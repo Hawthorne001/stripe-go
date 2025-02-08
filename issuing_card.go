@@ -29,6 +29,26 @@ const (
 	IssuingCardReplacementReasonStolen  IssuingCardReplacementReason = "stolen"
 )
 
+// The address validation capabilities to use.
+type IssuingCardShippingAddressValidationMode string
+
+// List of values that IssuingCardShippingAddressValidationMode can take
+const (
+	IssuingCardShippingAddressValidationModeDisabled                   IssuingCardShippingAddressValidationMode = "disabled"
+	IssuingCardShippingAddressValidationModeNormalizationOnly          IssuingCardShippingAddressValidationMode = "normalization_only"
+	IssuingCardShippingAddressValidationModeValidationAndNormalization IssuingCardShippingAddressValidationMode = "validation_and_normalization"
+)
+
+// The validation result for the shipping address.
+type IssuingCardShippingAddressValidationResult string
+
+// List of values that IssuingCardShippingAddressValidationResult can take
+const (
+	IssuingCardShippingAddressValidationResultIndeterminate       IssuingCardShippingAddressValidationResult = "indeterminate"
+	IssuingCardShippingAddressValidationResultLikelyDeliverable   IssuingCardShippingAddressValidationResult = "likely_deliverable"
+	IssuingCardShippingAddressValidationResultLikelyUndeliverable IssuingCardShippingAddressValidationResult = "likely_undeliverable"
+)
+
 // The delivery company that shipped a card.
 type IssuingCardShippingCarrier string
 
@@ -61,6 +81,7 @@ const (
 	IssuingCardShippingStatusPending   IssuingCardShippingStatus = "pending"
 	IssuingCardShippingStatusReturned  IssuingCardShippingStatus = "returned"
 	IssuingCardShippingStatusShipped   IssuingCardShippingStatus = "shipped"
+	IssuingCardShippingStatusSubmitted IssuingCardShippingStatus = "submitted"
 )
 
 // Packaging options.
@@ -140,7 +161,8 @@ type IssuingCardListParams struct {
 	// Only return cards that have the given expiration year.
 	ExpYear *int64 `form:"exp_year"`
 	// Only return cards that have the given last four digits.
-	Last4 *string `form:"last4"`
+	Last4                 *string `form:"last4"`
+	PersonalizationDesign *string `form:"personalization_design"`
 	// Only return cards that have the given status. One of `active`, `inactive`, or `canceled`.
 	Status *string `form:"status"`
 	// Only return cards that have the given type. One of `virtual` or `physical`.
@@ -158,6 +180,12 @@ type IssuingCardPINParams struct {
 	EncryptedNumber *string `form:"encrypted_number"`
 }
 
+// Address validation settings.
+type IssuingCardShippingAddressValidationParams struct {
+	// The address validation capabilities to use.
+	Mode *string `form:"mode"`
+}
+
 // Customs information for the shipment.
 type IssuingCardShippingCustomsParams struct {
 	// The Economic Operators Registration and Identification (EORI) number to use for Customs. Required for bulk shipments to Europe.
@@ -168,6 +196,8 @@ type IssuingCardShippingCustomsParams struct {
 type IssuingCardShippingParams struct {
 	// The address that the card is shipped to.
 	Address *AddressParams `form:"address"`
+	// Address validation settings.
+	AddressValidation *IssuingCardShippingAddressValidationParams `form:"address_validation"`
 	// Customs information for the shipment.
 	Customs *IssuingCardShippingCustomsParams `form:"customs"`
 	// The name printed on the shipping label when shipping the card.
@@ -196,8 +226,12 @@ type IssuingCardSpendingControlsSpendingLimitParams struct {
 type IssuingCardSpendingControlsParams struct {
 	// Array of strings containing [categories](https://stripe.com/docs/api#issuing_authorization_object-merchant_data-category) of authorizations to allow. All other categories will be blocked. Cannot be set with `blocked_categories`.
 	AllowedCategories []*string `form:"allowed_categories"`
+	// Array of strings containing representing countries from which authorizations will be allowed. Authorizations from merchants in all other countries will be declined. Country codes should be ISO 3166 alpha-2 country codes (e.g. `US`). Cannot be set with `blocked_merchant_countries`. Provide an empty value to unset this control.
+	AllowedMerchantCountries []*string `form:"allowed_merchant_countries"`
 	// Array of strings containing [categories](https://stripe.com/docs/api#issuing_authorization_object-merchant_data-category) of authorizations to decline. All other categories will be allowed. Cannot be set with `allowed_categories`.
 	BlockedCategories []*string `form:"blocked_categories"`
+	// Array of strings containing representing countries from which authorizations will be declined. Country codes should be ISO 3166 alpha-2 country codes (e.g. `US`). Cannot be set with `allowed_merchant_countries`. Provide an empty value to unset this control.
+	BlockedMerchantCountries []*string `form:"blocked_merchant_countries"`
 	// Limit spending with amount-based rules that apply across any cards this card replaced (i.e., its `replacement_for` card and _that_ card's `replacement_for` card, up the chain).
 	SpendingLimits []*IssuingCardSpendingControlsSpendingLimitParams `form:"spending_limits"`
 }
@@ -214,12 +248,16 @@ type IssuingCardParams struct {
 	FinancialAccount *string   `form:"financial_account"`
 	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
 	Metadata map[string]string `form:"metadata"`
+	// The personalization design object belonging to this card.
+	PersonalizationDesign *string `form:"personalization_design"`
 	// The desired new PIN for this card.
 	PIN *IssuingCardPINParams `form:"pin"`
 	// The card this is meant to be a replacement for (if any).
 	ReplacementFor *string `form:"replacement_for"`
 	// If `replacement_for` is specified, this should indicate why that card is being replaced.
 	ReplacementReason *string `form:"replacement_reason"`
+	// The second line to print on the card. Max length: 24 characters.
+	SecondLine *string `form:"second_line"`
 	// The address where the card will be shipped.
 	Shipping *IssuingCardShippingParams `form:"shipping"`
 	// Rules that control spending for this card. Refer to our [documentation](https://stripe.com/docs/issuing/controls/spending-controls) for more details.
@@ -247,6 +285,16 @@ func (p *IssuingCardParams) AddMetadata(key string, value string) {
 	p.Metadata[key] = value
 }
 
+// Address validation details for the shipment.
+type IssuingCardShippingAddressValidation struct {
+	// The address validation capabilities to use.
+	Mode IssuingCardShippingAddressValidationMode `json:"mode"`
+	// The normalized shipping address.
+	NormalizedAddress *Address `json:"normalized_address"`
+	// The validation result for the shipping address.
+	Result IssuingCardShippingAddressValidationResult `json:"result"`
+}
+
 // Additional information that may be required for clearing customs.
 type IssuingCardShippingCustoms struct {
 	// A registration number used for customs in Europe. See [https://www.gov.uk/eori](https://www.gov.uk/eori) for the UK and [https://ec.europa.eu/taxation_customs/business/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en](https://ec.europa.eu/taxation_customs/business/customs-procedures-import-and-export/customs-procedures/economic-operators-registration-and-identification-number-eori_en) for the EU.
@@ -256,6 +304,8 @@ type IssuingCardShippingCustoms struct {
 // Where and how the card will be shipped.
 type IssuingCardShipping struct {
 	Address *Address `json:"address"`
+	// Address validation details for the shipment.
+	AddressValidation *IssuingCardShippingAddressValidation `json:"address_validation"`
 	// The delivery company that shipped a card.
 	Carrier IssuingCardShippingCarrier `json:"carrier"`
 	// Additional information that may be required for clearing customs.
@@ -292,8 +342,12 @@ type IssuingCardSpendingControlsSpendingLimit struct {
 type IssuingCardSpendingControls struct {
 	// Array of strings containing [categories](https://stripe.com/docs/api#issuing_authorization_object-merchant_data-category) of authorizations to allow. All other categories will be blocked. Cannot be set with `blocked_categories`.
 	AllowedCategories []string `json:"allowed_categories"`
+	// Array of strings containing representing countries from which authorizations will be allowed. Authorizations from merchants in all other countries will be declined. Country codes should be ISO 3166 alpha-2 country codes (e.g. `US`). Cannot be set with `blocked_merchant_countries`. Provide an empty value to unset this control.
+	AllowedMerchantCountries []string `json:"allowed_merchant_countries"`
 	// Array of strings containing [categories](https://stripe.com/docs/api#issuing_authorization_object-merchant_data-category) of authorizations to decline. All other categories will be allowed. Cannot be set with `allowed_categories`.
 	BlockedCategories []string `json:"blocked_categories"`
+	// Array of strings containing representing countries from which authorizations will be declined. Country codes should be ISO 3166 alpha-2 country codes (e.g. `US`). Cannot be set with `allowed_merchant_countries`. Provide an empty value to unset this control.
+	BlockedMerchantCountries []string `json:"blocked_merchant_countries"`
 	// Limit spending with amount-based rules that apply across any cards this card replaced (i.e., its `replacement_for` card and _that_ card's `replacement_for` card, up the chain).
 	SpendingLimits []*IssuingCardSpendingControlsSpendingLimit `json:"spending_limits"`
 	// Currency of the amounts within `spending_limits`. Always the same as the currency of the card.
@@ -320,7 +374,7 @@ type IssuingCardWallets struct {
 	PrimaryAccountIdentifier string `json:"primary_account_identifier"`
 }
 
-// You can [create physical or virtual cards](https://stripe.com/docs/issuing/cards) that are issued to cardholders.
+// You can [create physical or virtual cards](https://stripe.com/docs/issuing) that are issued to cardholders.
 type IssuingCard struct {
 	APIResource
 	// The brand of the card.
@@ -329,7 +383,7 @@ type IssuingCard struct {
 	CancellationReason IssuingCardCancellationReason `json:"cancellation_reason"`
 	// An Issuing `Cardholder` object represents an individual or business entity who is [issued](https://stripe.com/docs/issuing) cards.
 	//
-	// Related guide: [How to create a cardholder](https://stripe.com/docs/issuing/cards#create-cardholder)
+	// Related guide: [How to create a cardholder](https://stripe.com/docs/issuing/cards/virtual/issue-cards#create-cardholder)
 	Cardholder *IssuingCardholder `json:"cardholder"`
 	// Time at which the object was created. Measured in seconds since the Unix epoch.
 	Created int64 `json:"created"`
@@ -355,6 +409,8 @@ type IssuingCard struct {
 	Number string `json:"number"`
 	// String representing the object's type. Objects of the same type share the same value.
 	Object string `json:"object"`
+	// The personalization design object belonging to this card.
+	PersonalizationDesign *IssuingPersonalizationDesign `json:"personalization_design"`
 	// The latest card that replaces this card, if any.
 	ReplacedBy *IssuingCard `json:"replaced_by"`
 	// The card this card replaces, if any.

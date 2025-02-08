@@ -10,8 +10,8 @@ package account
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /financial_connections/accounts APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// GetByID returns the details of a financial connections account.
+// Retrieves the details of an Financial Connections Account.
 func GetByID(id string, params *stripe.FinancialConnectionsAccountParams) (*stripe.FinancialConnectionsAccount, error) {
 	return getC().GetByID(id, params)
 }
 
-// GetByID returns the details of a financial connections account.
+// Retrieves the details of an Financial Connections Account.
 func (c Client) GetByID(id string, params *stripe.FinancialConnectionsAccountParams) (*stripe.FinancialConnectionsAccount, error) {
 	path := stripe.FormatURLPath("/v1/financial_connections/accounts/%s", id)
 	account := &stripe.FinancialConnectionsAccount{}
@@ -33,76 +33,68 @@ func (c Client) GetByID(id string, params *stripe.FinancialConnectionsAccountPar
 	return account, err
 }
 
-// Disconnect is the method for the `POST /v1/financial_connections/accounts/{account}/disconnect` API.
+// Disables your access to a Financial Connections Account. You will no longer be able to access data associated with the account (e.g. balances, transactions).
 func Disconnect(id string, params *stripe.FinancialConnectionsAccountDisconnectParams) (*stripe.FinancialConnectionsAccount, error) {
 	return getC().Disconnect(id, params)
 }
 
-// Disconnect is the method for the `POST /v1/financial_connections/accounts/{account}/disconnect` API.
+// Disables your access to a Financial Connections Account. You will no longer be able to access data associated with the account (e.g. balances, transactions).
 func (c Client) Disconnect(id string, params *stripe.FinancialConnectionsAccountDisconnectParams) (*stripe.FinancialConnectionsAccount, error) {
 	path := stripe.FormatURLPath(
-		"/v1/financial_connections/accounts/%s/disconnect",
-		id,
-	)
+		"/v1/financial_connections/accounts/%s/disconnect", id)
 	account := &stripe.FinancialConnectionsAccount{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, account)
 	return account, err
 }
 
-// Refresh is the method for the `POST /v1/financial_connections/accounts/{account}/refresh` API.
+// Refreshes the data associated with a Financial Connections Account.
 func Refresh(id string, params *stripe.FinancialConnectionsAccountRefreshParams) (*stripe.FinancialConnectionsAccount, error) {
 	return getC().Refresh(id, params)
 }
 
-// Refresh is the method for the `POST /v1/financial_connections/accounts/{account}/refresh` API.
+// Refreshes the data associated with a Financial Connections Account.
 func (c Client) Refresh(id string, params *stripe.FinancialConnectionsAccountRefreshParams) (*stripe.FinancialConnectionsAccount, error) {
 	path := stripe.FormatURLPath(
-		"/v1/financial_connections/accounts/%s/refresh",
-		id,
-	)
+		"/v1/financial_connections/accounts/%s/refresh", id)
 	account := &stripe.FinancialConnectionsAccount{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, account)
 	return account, err
 }
 
-// Subscribe is the method for the `POST /v1/financial_connections/accounts/{account}/subscribe` API.
+// Subscribes to periodic refreshes of data associated with a Financial Connections Account.
 func Subscribe(id string, params *stripe.FinancialConnectionsAccountSubscribeParams) (*stripe.FinancialConnectionsAccount, error) {
 	return getC().Subscribe(id, params)
 }
 
-// Subscribe is the method for the `POST /v1/financial_connections/accounts/{account}/subscribe` API.
+// Subscribes to periodic refreshes of data associated with a Financial Connections Account.
 func (c Client) Subscribe(id string, params *stripe.FinancialConnectionsAccountSubscribeParams) (*stripe.FinancialConnectionsAccount, error) {
 	path := stripe.FormatURLPath(
-		"/v1/financial_connections/accounts/%s/subscribe",
-		id,
-	)
+		"/v1/financial_connections/accounts/%s/subscribe", id)
 	account := &stripe.FinancialConnectionsAccount{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, account)
 	return account, err
 }
 
-// Unsubscribe is the method for the `POST /v1/financial_connections/accounts/{account}/unsubscribe` API.
+// Unsubscribes from periodic refreshes of data associated with a Financial Connections Account.
 func Unsubscribe(id string, params *stripe.FinancialConnectionsAccountUnsubscribeParams) (*stripe.FinancialConnectionsAccount, error) {
 	return getC().Unsubscribe(id, params)
 }
 
-// Unsubscribe is the method for the `POST /v1/financial_connections/accounts/{account}/unsubscribe` API.
+// Unsubscribes from periodic refreshes of data associated with a Financial Connections Account.
 func (c Client) Unsubscribe(id string, params *stripe.FinancialConnectionsAccountUnsubscribeParams) (*stripe.FinancialConnectionsAccount, error) {
 	path := stripe.FormatURLPath(
-		"/v1/financial_connections/accounts/%s/unsubscribe",
-		id,
-	)
+		"/v1/financial_connections/accounts/%s/unsubscribe", id)
 	account := &stripe.FinancialConnectionsAccount{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, account)
 	return account, err
 }
 
-// List returns a list of financial connections accounts.
+// Returns a list of Financial Connections Account objects.
 func List(params *stripe.FinancialConnectionsAccountListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of financial connections accounts.
+// Returns a list of Financial Connections Account objects.
 func (c Client) List(listParams *stripe.FinancialConnectionsAccountListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
@@ -136,17 +128,16 @@ func (i *Iter) FinancialConnectionsAccountList() *stripe.FinancialConnectionsAcc
 	return i.List().(*stripe.FinancialConnectionsAccountList)
 }
 
-// ListOwners is the method for the `GET /v1/financial_connections/accounts/{account}/owners` API.
+// Lists all owners for a given Account
 func ListOwners(params *stripe.FinancialConnectionsAccountListOwnersParams) *OwnerIter {
 	return getC().ListOwners(params)
 }
 
-// ListOwners is the method for the `GET /v1/financial_connections/accounts/{account}/owners` API.
+// Lists all owners for a given Account
 func (c Client) ListOwners(listParams *stripe.FinancialConnectionsAccountListOwnersParams) *OwnerIter {
 	path := stripe.FormatURLPath(
-		"/v1/financial_connections/accounts/%s/owners",
-		stripe.StringValue(listParams.Account),
-	)
+		"/v1/financial_connections/accounts/%s/owners", stripe.StringValue(
+			listParams.Account))
 	return &OwnerIter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
 			list := &stripe.FinancialConnectionsAccountOwnerList{}

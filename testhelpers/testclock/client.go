@@ -10,8 +10,8 @@ package testclock
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /test_helpers/test_clocks APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new test helpers test clock.
+// Creates a new test clock that can be attached to new customers and quotes.
 func New(params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	return getC().New(params)
 }
 
-// New creates a new test helpers test clock.
+// Creates a new test clock that can be attached to new customers and quotes.
 func (c Client) New(params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	testclock := &stripe.TestHelpersTestClock{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/test_helpers/test_clocks",
-		c.Key,
-		params,
-		testclock,
-	)
+		http.MethodPost, "/v1/test_helpers/test_clocks", c.Key, params, testclock)
 	return testclock, err
 }
 
-// Get returns the details of a test helpers test clock.
+// Retrieves a test clock.
 func Get(id string, params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a test helpers test clock.
+// Retrieves a test clock.
 func (c Client) Get(id string, params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	path := stripe.FormatURLPath("/v1/test_helpers/test_clocks/%s", id)
 	testclock := &stripe.TestHelpersTestClock{}
@@ -51,12 +46,12 @@ func (c Client) Get(id string, params *stripe.TestHelpersTestClockParams) (*stri
 	return testclock, err
 }
 
-// Del removes a test helpers test clock.
+// Deletes a test clock.
 func Del(id string, params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	return getC().Del(id, params)
 }
 
-// Del removes a test helpers test clock.
+// Deletes a test clock.
 func (c Client) Del(id string, params *stripe.TestHelpersTestClockParams) (*stripe.TestHelpersTestClock, error) {
 	path := stripe.FormatURLPath("/v1/test_helpers/test_clocks/%s", id)
 	testclock := &stripe.TestHelpersTestClock{}
@@ -64,12 +59,12 @@ func (c Client) Del(id string, params *stripe.TestHelpersTestClockParams) (*stri
 	return testclock, err
 }
 
-// Advance is the method for the `POST /v1/test_helpers/test_clocks/{test_clock}/advance` API.
+// Starts advancing a test clock to a specified time in the future. Advancement is done when status changes to Ready.
 func Advance(id string, params *stripe.TestHelpersTestClockAdvanceParams) (*stripe.TestHelpersTestClock, error) {
 	return getC().Advance(id, params)
 }
 
-// Advance is the method for the `POST /v1/test_helpers/test_clocks/{test_clock}/advance` API.
+// Starts advancing a test clock to a specified time in the future. Advancement is done when status changes to Ready.
 func (c Client) Advance(id string, params *stripe.TestHelpersTestClockAdvanceParams) (*stripe.TestHelpersTestClock, error) {
 	path := stripe.FormatURLPath("/v1/test_helpers/test_clocks/%s/advance", id)
 	testclock := &stripe.TestHelpersTestClock{}
@@ -77,12 +72,12 @@ func (c Client) Advance(id string, params *stripe.TestHelpersTestClockAdvancePar
 	return testclock, err
 }
 
-// List returns a list of test helpers test clocks.
+// Returns a list of your test clocks.
 func List(params *stripe.TestHelpersTestClockListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of test helpers test clocks.
+// Returns a list of your test clocks.
 func (c Client) List(listParams *stripe.TestHelpersTestClockListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

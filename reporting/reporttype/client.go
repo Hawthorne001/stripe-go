@@ -10,8 +10,8 @@ package reporttype
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /reporting/report_types APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// Get returns the details of a reporting report type.
+// Retrieves the details of a Report Type. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
 func Get(id string, params *stripe.ReportingReportTypeParams) (*stripe.ReportingReportType, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a reporting report type.
+// Retrieves the details of a Report Type. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
 func (c Client) Get(id string, params *stripe.ReportingReportTypeParams) (*stripe.ReportingReportType, error) {
 	path := stripe.FormatURLPath("/v1/reporting/report_types/%s", id)
 	reporttype := &stripe.ReportingReportType{}
@@ -33,12 +33,12 @@ func (c Client) Get(id string, params *stripe.ReportingReportTypeParams) (*strip
 	return reporttype, err
 }
 
-// List returns a list of reporting report types.
+// Returns a full list of Report Types.
 func List(params *stripe.ReportingReportTypeListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of reporting report types.
+// Returns a full list of Report Types.
 func (c Client) List(listParams *stripe.ReportingReportTypeListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

@@ -8,6 +8,15 @@ package stripe
 
 import "encoding/json"
 
+// Type of the pretax credit amount referenced.
+type CreditNotePretaxCreditAmountType string
+
+// List of values that CreditNotePretaxCreditAmountType can take
+const (
+	CreditNotePretaxCreditAmountTypeCreditBalanceTransaction CreditNotePretaxCreditAmountType = "credit_balance_transaction"
+	CreditNotePretaxCreditAmountTypeDiscount                 CreditNotePretaxCreditAmountType = "discount"
+)
+
 // Reason for issuing this credit note, one of `duplicate`, `fraudulent`, `order_change`, or `product_unsatisfactory`
 type CreditNoteReason string
 
@@ -84,6 +93,10 @@ const (
 // Returns a list of credit notes.
 type CreditNoteListParams struct {
 	ListParams `form:"*"`
+	// Only return credit notes that were created during the given date interval.
+	Created *int64 `form:"created"`
+	// Only return credit notes that were created during the given date interval.
+	CreatedRange *RangeQueryParams `form:"created"`
 	// Only return credit notes for the customer specified by this customer ID.
 	Customer *string `form:"customer"`
 	// Specifies which fields in the response should be expanded.
@@ -109,7 +122,7 @@ type CreditNoteLineTaxAmountParams struct {
 
 // Line items that make up the credit note.
 type CreditNoteLineParams struct {
-	// The line item amount to credit. Only valid when `type` is `invoice_line_item`.
+	// The line item amount to credit. Only valid when `type` is `invoice_line_item`. If invoice is set up with `automatic_tax[enabled]=true`, this amount is tax exclusive
 	Amount *int64 `form:"amount"`
 	// The description of the credit note line item. Only valid when the `type` is `custom_line_item`.
 	Description *string `form:"description"`
@@ -155,6 +168,8 @@ type CreditNoteParams struct {
 	CreditAmount *int64 `form:"credit_amount"`
 	// The date when this credit note is in effect. Same as `created` unless overwritten. When defined, this value replaces the system-generated 'Date of issue' printed on the credit note PDF.
 	EffectiveAt *int64 `form:"effective_at"`
+	// Type of email to send to the customer, one of `credit_note` or `none` and the default is `credit_note`.
+	EmailType *string `form:"email_type"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
 	// ID of the invoice.
@@ -203,7 +218,7 @@ type CreditNotePreviewLineTaxAmountParams struct {
 
 // Line items that make up the credit note.
 type CreditNotePreviewLineParams struct {
-	// The line item amount to credit. Only valid when `type` is `invoice_line_item`.
+	// The line item amount to credit. Only valid when `type` is `invoice_line_item`. If invoice is set up with `automatic_tax[enabled]=true`, this amount is tax exclusive
 	Amount *int64 `form:"amount"`
 	// The description of the credit note line item. Only valid when the `type` is `custom_line_item`.
 	Description *string `form:"description"`
@@ -238,6 +253,8 @@ type CreditNotePreviewParams struct {
 	CreditAmount *int64 `form:"credit_amount"`
 	// The date when this credit note is in effect. Same as `created` unless overwritten. When defined, this value replaces the system-generated 'Date of issue' printed on the credit note PDF.
 	EffectiveAt *int64 `form:"effective_at"`
+	// Type of email to send to the customer, one of `credit_note` or `none` and the default is `credit_note`.
+	EmailType *string `form:"email_type"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
 	// ID of the invoice.
@@ -286,7 +303,7 @@ type CreditNotePreviewLinesLineTaxAmountParams struct {
 
 // Line items that make up the credit note.
 type CreditNotePreviewLinesLineParams struct {
-	// The line item amount to credit. Only valid when `type` is `invoice_line_item`.
+	// The line item amount to credit. Only valid when `type` is `invoice_line_item`. If invoice is set up with `automatic_tax[enabled]=true`, this amount is tax exclusive
 	Amount *int64 `form:"amount"`
 	// The description of the credit note line item. Only valid when the `type` is `custom_line_item`.
 	Description *string `form:"description"`
@@ -321,6 +338,8 @@ type CreditNotePreviewLinesParams struct {
 	CreditAmount *int64 `form:"credit_amount"`
 	// The date when this credit note is in effect. Same as `created` unless overwritten. When defined, this value replaces the system-generated 'Date of issue' printed on the credit note PDF.
 	EffectiveAt *int64 `form:"effective_at"`
+	// Type of email to send to the customer, one of `credit_note` or `none` and the default is `credit_note`.
+	EmailType *string `form:"email_type"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
 	// ID of the invoice.
@@ -369,7 +388,7 @@ func (p *CreditNoteVoidCreditNoteParams) AddExpand(f string) {
 	p.Expand = append(p.Expand, &f)
 }
 
-// When retrieving a credit note, you'll get a lines property containing the the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
+// When retrieving a credit note, you'll get a lines property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
 type CreditNoteListLinesParams struct {
 	ListParams `form:"*"`
 	CreditNote *string `form:"-"` // Included in URL
@@ -388,6 +407,18 @@ type CreditNoteDiscountAmount struct {
 	Amount int64 `json:"amount"`
 	// The discount that was applied to get this discount amount.
 	Discount *Discount `json:"discount"`
+}
+
+// The pretax credit amounts (ex: discount, credit grants, etc) for all line items.
+type CreditNotePretaxCreditAmount struct {
+	// The amount, in cents (or local equivalent), of the pretax credit amount.
+	Amount int64 `json:"amount"`
+	// The credit balance transaction that was applied to get this pretax credit amount.
+	CreditBalanceTransaction *BillingCreditBalanceTransaction `json:"credit_balance_transaction"`
+	// The discount that was applied to get this pretax credit amount.
+	Discount *Discount `json:"discount"`
+	// Type of the pretax credit amount referenced.
+	Type CreditNotePretaxCreditAmountType `json:"type"`
 }
 
 // The taxes applied to the shipping rate.
@@ -475,6 +506,8 @@ type CreditNote struct {
 	OutOfBandAmount int64 `json:"out_of_band_amount"`
 	// The link to download the PDF of the credit note.
 	PDF string `json:"pdf"`
+	// The pretax credit amounts (ex: discount, credit grants, etc) for all line items.
+	PretaxCreditAmounts []*CreditNotePretaxCreditAmount `json:"pretax_credit_amounts"`
 	// Reason for issuing this credit note, one of `duplicate`, `fraudulent`, `order_change`, or `product_unsatisfactory`
 	Reason CreditNoteReason `json:"reason"`
 	// Refund related to this credit note.

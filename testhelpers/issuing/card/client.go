@@ -10,7 +10,7 @@ package card
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /issuing/cards APIs.
@@ -19,65 +19,71 @@ type Client struct {
 	Key string
 }
 
-// DeliverCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/deliver` API.
+// Updates the shipping status of the specified Issuing Card object to delivered.
 func DeliverCard(id string, params *stripe.TestHelpersIssuingCardDeliverCardParams) (*stripe.IssuingCard, error) {
 	return getC().DeliverCard(id, params)
 }
 
-// DeliverCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/deliver` API.
+// Updates the shipping status of the specified Issuing Card object to delivered.
 func (c Client) DeliverCard(id string, params *stripe.TestHelpersIssuingCardDeliverCardParams) (*stripe.IssuingCard, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/issuing/cards/%s/shipping/deliver",
-		id,
-	)
+		"/v1/test_helpers/issuing/cards/%s/shipping/deliver", id)
 	card := &stripe.IssuingCard{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, card)
 	return card, err
 }
 
-// FailCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/fail` API.
+// Updates the shipping status of the specified Issuing Card object to failure.
 func FailCard(id string, params *stripe.TestHelpersIssuingCardFailCardParams) (*stripe.IssuingCard, error) {
 	return getC().FailCard(id, params)
 }
 
-// FailCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/fail` API.
+// Updates the shipping status of the specified Issuing Card object to failure.
 func (c Client) FailCard(id string, params *stripe.TestHelpersIssuingCardFailCardParams) (*stripe.IssuingCard, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/issuing/cards/%s/shipping/fail",
-		id,
-	)
+		"/v1/test_helpers/issuing/cards/%s/shipping/fail", id)
 	card := &stripe.IssuingCard{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, card)
 	return card, err
 }
 
-// ReturnCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/return` API.
+// Updates the shipping status of the specified Issuing Card object to returned.
 func ReturnCard(id string, params *stripe.TestHelpersIssuingCardReturnCardParams) (*stripe.IssuingCard, error) {
 	return getC().ReturnCard(id, params)
 }
 
-// ReturnCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/return` API.
+// Updates the shipping status of the specified Issuing Card object to returned.
 func (c Client) ReturnCard(id string, params *stripe.TestHelpersIssuingCardReturnCardParams) (*stripe.IssuingCard, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/issuing/cards/%s/shipping/return",
-		id,
-	)
+		"/v1/test_helpers/issuing/cards/%s/shipping/return", id)
 	card := &stripe.IssuingCard{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, card)
 	return card, err
 }
 
-// ShipCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/ship` API.
+// Updates the shipping status of the specified Issuing Card object to shipped.
 func ShipCard(id string, params *stripe.TestHelpersIssuingCardShipCardParams) (*stripe.IssuingCard, error) {
 	return getC().ShipCard(id, params)
 }
 
-// ShipCard is the method for the `POST /v1/test_helpers/issuing/cards/{card}/shipping/ship` API.
+// Updates the shipping status of the specified Issuing Card object to shipped.
 func (c Client) ShipCard(id string, params *stripe.TestHelpersIssuingCardShipCardParams) (*stripe.IssuingCard, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/issuing/cards/%s/shipping/ship",
-		id,
-	)
+		"/v1/test_helpers/issuing/cards/%s/shipping/ship", id)
+	card := &stripe.IssuingCard{}
+	err := c.B.Call(http.MethodPost, path, c.Key, params, card)
+	return card, err
+}
+
+// Updates the shipping status of the specified Issuing Card object to submitted. This method requires Stripe Version ‘2024-09-30.acacia' or later.
+func SubmitCard(id string, params *stripe.TestHelpersIssuingCardSubmitCardParams) (*stripe.IssuingCard, error) {
+	return getC().SubmitCard(id, params)
+}
+
+// Updates the shipping status of the specified Issuing Card object to submitted. This method requires Stripe Version ‘2024-09-30.acacia' or later.
+func (c Client) SubmitCard(id string, params *stripe.TestHelpersIssuingCardSubmitCardParams) (*stripe.IssuingCard, error) {
+	path := stripe.FormatURLPath(
+		"/v1/test_helpers/issuing/cards/%s/shipping/submit", id)
 	card := &stripe.IssuingCard{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, card)
 	return card, err

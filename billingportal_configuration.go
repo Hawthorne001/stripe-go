@@ -75,6 +75,15 @@ const (
 	BillingPortalConfigurationFeaturesSubscriptionUpdateProrationBehaviorNone             BillingPortalConfigurationFeaturesSubscriptionUpdateProrationBehavior = "none"
 )
 
+// The type of condition.
+type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionType string
+
+// List of values that BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionType can take
+const (
+	BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionTypeDecreasingItemAmount BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionType = "decreasing_item_amount"
+	BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionTypeShorteningInterval   BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionType = "shortening_interval"
+)
+
 // Returns a list of configurations that describe the functionality of the customer portal.
 type BillingPortalConfigurationListParams struct {
 	ListParams `form:"*"`
@@ -137,14 +146,8 @@ type BillingPortalConfigurationFeaturesSubscriptionCancelParams struct {
 	Enabled *bool `form:"enabled"`
 	// Whether to cancel subscriptions immediately or at the end of the billing period.
 	Mode *string `form:"mode"`
-	// Whether to create prorations when canceling subscriptions. Possible values are `none` and `create_prorations`, which is only compatible with `mode=immediately`. No prorations are generated when canceling a subscription at the end of its natural billing period.
+	// Whether to create prorations when canceling subscriptions. Possible values are `none` and `create_prorations`, which is only compatible with `mode=immediately`. Passing `always_invoice` will result in an error. No prorations are generated when canceling a subscription at the end of its natural billing period.
 	ProrationBehavior *string `form:"proration_behavior"`
-}
-
-// Information about pausing subscriptions in the portal.
-type BillingPortalConfigurationFeaturesSubscriptionPauseParams struct {
-	// Whether the feature is enabled.
-	Enabled *bool `form:"enabled"`
 }
 
 // The list of up to 10 products that support subscription updates.
@@ -153,6 +156,18 @@ type BillingPortalConfigurationFeaturesSubscriptionUpdateProductParams struct {
 	Prices []*string `form:"prices"`
 	// The product id.
 	Product *string `form:"product"`
+}
+
+// List of conditions. When any condition is true, the update will be scheduled at the end of the current period.
+type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionParams struct {
+	// The type of condition.
+	Type *string `form:"type"`
+}
+
+// Setting to control when an update should be scheduled at the end of the period instead of applying immediately.
+type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndParams struct {
+	// List of conditions. When any condition is true, the update will be scheduled at the end of the current period.
+	Conditions []*BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionParams `form:"conditions"`
 }
 
 // Information about updating subscriptions in the portal.
@@ -165,6 +180,8 @@ type BillingPortalConfigurationFeaturesSubscriptionUpdateParams struct {
 	Products []*BillingPortalConfigurationFeaturesSubscriptionUpdateProductParams `form:"products"`
 	// Determines how to handle prorations resulting from subscription updates. Valid values are `none`, `create_prorations`, and `always_invoice`.
 	ProrationBehavior *string `form:"proration_behavior"`
+	// Setting to control when an update should be scheduled at the end of the period instead of applying immediately.
+	ScheduleAtPeriodEnd *BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndParams `form:"schedule_at_period_end"`
 }
 
 // Information about the features available in the portal.
@@ -177,8 +194,6 @@ type BillingPortalConfigurationFeaturesParams struct {
 	PaymentMethodUpdate *BillingPortalConfigurationFeaturesPaymentMethodUpdateParams `form:"payment_method_update"`
 	// Information about canceling subscriptions in the portal.
 	SubscriptionCancel *BillingPortalConfigurationFeaturesSubscriptionCancelParams `form:"subscription_cancel"`
-	// Information about pausing subscriptions in the portal.
-	SubscriptionPause *BillingPortalConfigurationFeaturesSubscriptionPauseParams `form:"subscription_pause"`
 	// Information about updating subscriptions in the portal.
 	SubscriptionUpdate *BillingPortalConfigurationFeaturesSubscriptionUpdateParams `form:"subscription_update"`
 }
@@ -261,10 +276,6 @@ type BillingPortalConfigurationFeaturesSubscriptionCancel struct {
 	// Whether to create prorations when canceling subscriptions. Possible values are `none` and `create_prorations`.
 	ProrationBehavior BillingPortalConfigurationFeaturesSubscriptionCancelProrationBehavior `json:"proration_behavior"`
 }
-type BillingPortalConfigurationFeaturesSubscriptionPause struct {
-	// Whether the feature is enabled.
-	Enabled bool `json:"enabled"`
-}
 
 // The list of up to 10 products that support subscription updates.
 type BillingPortalConfigurationFeaturesSubscriptionUpdateProduct struct {
@@ -272,6 +283,16 @@ type BillingPortalConfigurationFeaturesSubscriptionUpdateProduct struct {
 	Prices []string `json:"prices"`
 	// The product ID.
 	Product string `json:"product"`
+}
+
+// List of conditions. When any condition is true, an update will be scheduled at the end of the current period.
+type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndCondition struct {
+	// The type of condition.
+	Type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndConditionType `json:"type"`
+}
+type BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEnd struct {
+	// List of conditions. When any condition is true, an update will be scheduled at the end of the current period.
+	Conditions []*BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEndCondition `json:"conditions"`
 }
 type BillingPortalConfigurationFeaturesSubscriptionUpdate struct {
 	// The types of subscription updates that are supported for items listed in the `products` attribute. When empty, subscriptions are not updateable.
@@ -281,14 +302,14 @@ type BillingPortalConfigurationFeaturesSubscriptionUpdate struct {
 	// The list of up to 10 products that support subscription updates.
 	Products []*BillingPortalConfigurationFeaturesSubscriptionUpdateProduct `json:"products"`
 	// Determines how to handle prorations resulting from subscription updates. Valid values are `none`, `create_prorations`, and `always_invoice`. Defaults to a value of `none` if you don't set it during creation.
-	ProrationBehavior BillingPortalConfigurationFeaturesSubscriptionUpdateProrationBehavior `json:"proration_behavior"`
+	ProrationBehavior   BillingPortalConfigurationFeaturesSubscriptionUpdateProrationBehavior    `json:"proration_behavior"`
+	ScheduleAtPeriodEnd *BillingPortalConfigurationFeaturesSubscriptionUpdateScheduleAtPeriodEnd `json:"schedule_at_period_end"`
 }
 type BillingPortalConfigurationFeatures struct {
 	CustomerUpdate      *BillingPortalConfigurationFeaturesCustomerUpdate      `json:"customer_update"`
 	InvoiceHistory      *BillingPortalConfigurationFeaturesInvoiceHistory      `json:"invoice_history"`
 	PaymentMethodUpdate *BillingPortalConfigurationFeaturesPaymentMethodUpdate `json:"payment_method_update"`
 	SubscriptionCancel  *BillingPortalConfigurationFeaturesSubscriptionCancel  `json:"subscription_cancel"`
-	SubscriptionPause   *BillingPortalConfigurationFeaturesSubscriptionPause   `json:"subscription_pause"`
 	SubscriptionUpdate  *BillingPortalConfigurationFeaturesSubscriptionUpdate  `json:"subscription_update"`
 }
 type BillingPortalConfigurationLoginPage struct {

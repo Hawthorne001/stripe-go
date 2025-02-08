@@ -8,7 +8,7 @@ package stripe
 
 import (
 	"encoding/json"
-	"github.com/stripe/stripe-go/v76/form"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Type of the account referenced.
@@ -170,12 +170,14 @@ type QuoteAutomaticTaxParams struct {
 	Liability *QuoteAutomaticTaxLiabilityParams `form:"liability"`
 }
 
-// The discounts applied to the quote. You can only set up to one discount.
+// The discounts applied to the quote.
 type QuoteDiscountParams struct {
 	// ID of the coupon to create a new discount for.
 	Coupon *string `form:"coupon"`
 	// ID of an existing discount on the object (or one of its ancestors) to reuse.
 	Discount *string `form:"discount"`
+	// ID of the promotion code to create a new discount for.
+	PromotionCode *string `form:"promotion_code"`
 }
 
 // Clone an existing quote. The new quote will be created in `status=draft`. When using this parameter, you cannot specify any other parameters except for `expires_at`.
@@ -200,6 +202,16 @@ type QuoteInvoiceSettingsParams struct {
 	DaysUntilDue *int64 `form:"days_until_due"`
 	// The connected account that issues the invoice. The invoice is presented with the branding and support information of the specified account.
 	Issuer *QuoteInvoiceSettingsIssuerParams `form:"issuer"`
+}
+
+// The discounts applied to this line item.
+type QuoteLineItemDiscountParams struct {
+	// ID of the coupon to create a new discount for.
+	Coupon *string `form:"coupon"`
+	// ID of an existing discount on the object (or one of its ancestors) to reuse.
+	Discount *string `form:"discount"`
+	// ID of the promotion code to create a new discount for.
+	PromotionCode *string `form:"promotion_code"`
 }
 
 // The recurring components of a price such as `interval` and `interval_count`.
@@ -228,6 +240,8 @@ type QuoteLineItemPriceDataParams struct {
 
 // A list of line items the customer is being quoted for. Each line item includes information about the product, the quantity, and the resulting cost.
 type QuoteLineItemParams struct {
+	// The discounts applied to this line item.
+	Discounts []*QuoteLineItemDiscountParams `form:"discounts"`
 	// The ID of an existing line item on the quote.
 	ID *string `form:"id"`
 	// The ID of the price object. One of `price` or `price_data` is required.
@@ -296,7 +310,7 @@ type QuoteParams struct {
 	DefaultTaxRates []*string `form:"default_tax_rates"`
 	// A description that will be displayed on the quote PDF. If no value is passed, the default description configured in your [quote template settings](https://dashboard.stripe.com/settings/billing/quote) will be used.
 	Description *string `form:"description"`
-	// The discounts applied to the quote. You can only set up to one discount.
+	// The discounts applied to the quote.
 	Discounts []*QuoteDiscountParams `form:"discounts"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
@@ -402,7 +416,7 @@ func (p *QuoteFinalizeQuoteParams) AddExpand(f string) {
 	p.Expand = append(p.Expand, &f)
 }
 
-// Download the PDF for a finalized quote
+// Download the PDF for a finalized quote. Explanation for special handling can be found [here](https://docs.stripe.com/quotes/overview#quote_pdf)
 type QuotePDFParams struct {
 	Params `form:"*"`
 	// Specifies which fields in the response should be expanded.

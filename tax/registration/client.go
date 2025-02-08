@@ -10,8 +10,8 @@ package registration
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /tax/registrations APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new tax registration.
+// Creates a new Tax Registration object.
 func New(params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	return getC().New(params)
 }
 
-// New creates a new tax registration.
+// Creates a new Tax Registration object.
 func (c Client) New(params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	registration := &stripe.TaxRegistration{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/tax/registrations",
-		c.Key,
-		params,
-		registration,
-	)
+		http.MethodPost, "/v1/tax/registrations", c.Key, params, registration)
 	return registration, err
 }
 
-// Get returns the details of a tax registration.
+// Returns a Tax Registration object.
 func Get(id string, params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a tax registration.
+// Returns a Tax Registration object.
 func (c Client) Get(id string, params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	path := stripe.FormatURLPath("/v1/tax/registrations/%s", id)
 	registration := &stripe.TaxRegistration{}
@@ -51,12 +46,16 @@ func (c Client) Get(id string, params *stripe.TaxRegistrationParams) (*stripe.Ta
 	return registration, err
 }
 
-// Update updates a tax registration's properties.
+// Updates an existing Tax Registration object.
+//
+// A registration cannot be deleted after it has been created. If you wish to end a registration you may do so by setting expires_at.
 func Update(id string, params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates a tax registration's properties.
+// Updates an existing Tax Registration object.
+//
+// A registration cannot be deleted after it has been created. If you wish to end a registration you may do so by setting expires_at.
 func (c Client) Update(id string, params *stripe.TaxRegistrationParams) (*stripe.TaxRegistration, error) {
 	path := stripe.FormatURLPath("/v1/tax/registrations/%s", id)
 	registration := &stripe.TaxRegistration{}
@@ -64,12 +63,12 @@ func (c Client) Update(id string, params *stripe.TaxRegistrationParams) (*stripe
 	return registration, err
 }
 
-// List returns a list of tax registrations.
+// Returns a list of Tax Registration objects.
 func List(params *stripe.TaxRegistrationListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of tax registrations.
+// Returns a list of Tax Registration objects.
 func (c Client) List(listParams *stripe.TaxRegistrationListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

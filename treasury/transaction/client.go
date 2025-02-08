@@ -10,8 +10,8 @@ package transaction
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /treasury/transactions APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// Get returns the details of a treasury transaction.
+// Retrieves the details of an existing Transaction.
 func Get(id string, params *stripe.TreasuryTransactionParams) (*stripe.TreasuryTransaction, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a treasury transaction.
+// Retrieves the details of an existing Transaction.
 func (c Client) Get(id string, params *stripe.TreasuryTransactionParams) (*stripe.TreasuryTransaction, error) {
 	path := stripe.FormatURLPath("/v1/treasury/transactions/%s", id)
 	transaction := &stripe.TreasuryTransaction{}
@@ -33,12 +33,12 @@ func (c Client) Get(id string, params *stripe.TreasuryTransactionParams) (*strip
 	return transaction, err
 }
 
-// List returns a list of treasury transactions.
+// Retrieves a list of Transaction objects.
 func List(params *stripe.TreasuryTransactionListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of treasury transactions.
+// Retrieves a list of Transaction objects.
 func (c Client) List(listParams *stripe.TreasuryTransactionListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

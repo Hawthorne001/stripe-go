@@ -10,8 +10,8 @@ package transactionentry
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /treasury/transaction_entries APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// Get returns the details of a treasury transaction entry.
+// Retrieves a TransactionEntry object.
 func Get(id string, params *stripe.TreasuryTransactionEntryParams) (*stripe.TreasuryTransactionEntry, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a treasury transaction entry.
+// Retrieves a TransactionEntry object.
 func (c Client) Get(id string, params *stripe.TreasuryTransactionEntryParams) (*stripe.TreasuryTransactionEntry, error) {
 	path := stripe.FormatURLPath("/v1/treasury/transaction_entries/%s", id)
 	transactionentry := &stripe.TreasuryTransactionEntry{}
@@ -33,12 +33,12 @@ func (c Client) Get(id string, params *stripe.TreasuryTransactionEntryParams) (*
 	return transactionentry, err
 }
 
-// List returns a list of treasury transaction entries.
+// Retrieves a list of TransactionEntry objects.
 func List(params *stripe.TreasuryTransactionEntryListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of treasury transaction entries.
+// Retrieves a list of TransactionEntry objects.
 func (c Client) List(listParams *stripe.TreasuryTransactionEntryListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

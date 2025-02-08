@@ -10,8 +10,8 @@ package reportrun
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /reporting/report_runs APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new reporting report run.
+// Creates a new object and begin running the report. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
 func New(params *stripe.ReportingReportRunParams) (*stripe.ReportingReportRun, error) {
 	return getC().New(params)
 }
 
-// New creates a new reporting report run.
+// Creates a new object and begin running the report. (Certain report types require a [live-mode API key](https://stripe.com/docs/keys#test-live-modes).)
 func (c Client) New(params *stripe.ReportingReportRunParams) (*stripe.ReportingReportRun, error) {
 	reportrun := &stripe.ReportingReportRun{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/reporting/report_runs",
-		c.Key,
-		params,
-		reportrun,
-	)
+		http.MethodPost, "/v1/reporting/report_runs", c.Key, params, reportrun)
 	return reportrun, err
 }
 
-// Get returns the details of a reporting report run.
+// Retrieves the details of an existing Report Run.
 func Get(id string, params *stripe.ReportingReportRunParams) (*stripe.ReportingReportRun, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a reporting report run.
+// Retrieves the details of an existing Report Run.
 func (c Client) Get(id string, params *stripe.ReportingReportRunParams) (*stripe.ReportingReportRun, error) {
 	path := stripe.FormatURLPath("/v1/reporting/report_runs/%s", id)
 	reportrun := &stripe.ReportingReportRun{}
@@ -51,12 +46,12 @@ func (c Client) Get(id string, params *stripe.ReportingReportRunParams) (*stripe
 	return reportrun, err
 }
 
-// List returns a list of reporting report runs.
+// Returns a list of Report Runs, with the most recent appearing first.
 func List(params *stripe.ReportingReportRunListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of reporting report runs.
+// Returns a list of Report Runs, with the most recent appearing first.
 func (c Client) List(listParams *stripe.ReportingReportRunListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

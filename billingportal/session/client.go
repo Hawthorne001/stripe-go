@@ -10,7 +10,7 @@ package session
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /billing_portal/sessions APIs.
@@ -19,21 +19,16 @@ type Client struct {
 	Key string
 }
 
-// New creates a new billing portal session.
+// Creates a session of the customer portal.
 func New(params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error) {
 	return getC().New(params)
 }
 
-// New creates a new billing portal session.
+// Creates a session of the customer portal.
 func (c Client) New(params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error) {
 	session := &stripe.BillingPortalSession{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/billing_portal/sessions",
-		c.Key,
-		params,
-		session,
-	)
+		http.MethodPost, "/v1/billing_portal/sessions", c.Key, params, session)
 	return session, err
 }
 

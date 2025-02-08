@@ -10,8 +10,8 @@ package usagerecordsummary
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /subscription_items/{subscription_item}/usage_record_summaries APIs.
@@ -20,17 +20,20 @@ type Client struct {
 	Key string
 }
 
-// List returns a list of usage record summaries.
+// For the specified subscription item, returns a list of summary objects. Each object in the list provides usage information that's been summarized from multiple usage records and over a subscription billing period (e.g., 15 usage records in the month of September).
+//
+// The list is sorted in reverse-chronological order (newest first). The first list item represents the most current usage period that hasn't ended yet. Since new usage records can still be added, the returned summary information for the subscription item's ID should be seen as unstable until the subscription billing period ends.
 func List(params *stripe.UsageRecordSummaryListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of usage record summaries.
+// For the specified subscription item, returns a list of summary objects. Each object in the list provides usage information that's been summarized from multiple usage records and over a subscription billing period (e.g., 15 usage records in the month of September).
+//
+// The list is sorted in reverse-chronological order (newest first). The first list item represents the most current usage period that hasn't ended yet. Since new usage records can still be added, the returned summary information for the subscription item's ID should be seen as unstable until the subscription billing period ends.
 func (c Client) List(listParams *stripe.UsageRecordSummaryListParams) *Iter {
 	path := stripe.FormatURLPath(
-		"/v1/subscription_items/%s/usage_record_summaries",
-		stripe.StringValue(listParams.SubscriptionItem),
-	)
+		"/v1/subscription_items/%s/usage_record_summaries", stripe.StringValue(
+			listParams.SubscriptionItem))
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
 			list := &stripe.UsageRecordSummaryList{}

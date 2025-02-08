@@ -11,10 +11,11 @@ type TreasuryReceivedDebitFailureCode string
 
 // List of values that TreasuryReceivedDebitFailureCode can take
 const (
-	TreasuryReceivedDebitFailureCodeAccountClosed     TreasuryReceivedDebitFailureCode = "account_closed"
-	TreasuryReceivedDebitFailureCodeAccountFrozen     TreasuryReceivedDebitFailureCode = "account_frozen"
-	TreasuryReceivedDebitFailureCodeInsufficientFunds TreasuryReceivedDebitFailureCode = "insufficient_funds"
-	TreasuryReceivedDebitFailureCodeOther             TreasuryReceivedDebitFailureCode = "other"
+	TreasuryReceivedDebitFailureCodeAccountClosed            TreasuryReceivedDebitFailureCode = "account_closed"
+	TreasuryReceivedDebitFailureCodeAccountFrozen            TreasuryReceivedDebitFailureCode = "account_frozen"
+	TreasuryReceivedDebitFailureCodeInsufficientFunds        TreasuryReceivedDebitFailureCode = "insufficient_funds"
+	TreasuryReceivedDebitFailureCodeInternationalTransaction TreasuryReceivedDebitFailureCode = "international_transaction"
+	TreasuryReceivedDebitFailureCodeOther                    TreasuryReceivedDebitFailureCode = "other"
 )
 
 // Set when `type` is `balance`.
@@ -145,6 +146,8 @@ type TreasuryReceivedDebitLinkedFlows struct {
 	IssuingAuthorization string `json:"issuing_authorization"`
 	// Set if the ReceivedDebit is also viewable as an [Issuing Dispute](https://stripe.com/docs/api#issuing_disputes) object.
 	IssuingTransaction string `json:"issuing_transaction"`
+	// Set if the ReceivedDebit was created due to a [Payout](https://stripe.com/docs/api#payouts) object.
+	Payout string `json:"payout"`
 }
 
 // Details describing when a ReceivedDebit might be reversed.

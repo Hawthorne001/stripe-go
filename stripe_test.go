@@ -300,7 +300,7 @@ func TestShouldRetry(t *testing.T) {
 		assert.False(t, shouldRetry)
 	})
 
-	// 500 Internal Server Error -- retry if non-POST
+	// 500 Internal Server Error -- retry
 	t.Run("RetryOn500NonPost", func(t *testing.T) {
 		shouldRetry, _ := c.shouldRetry(
 			nil,
@@ -309,17 +309,6 @@ func TestShouldRetry(t *testing.T) {
 			0,
 		)
 		assert.True(t, shouldRetry)
-	})
-
-	// 500 Internal Server Error -- don't retry POST
-	t.Run("DontRetryOn500Post", func(t *testing.T) {
-		shouldRetry, _ := c.shouldRetry(
-			nil,
-			&http.Request{Method: http.MethodPost},
-			&http.Response{StatusCode: http.StatusInternalServerError},
-			0,
-		)
-		assert.False(t, shouldRetry)
 	})
 
 	// 503 Service Unavailable
@@ -560,7 +549,7 @@ func TestCall_TelemetryEnabled(t *testing.T) {
 	params.InternalSetUsage([]string{"llama", "bufo"})
 	for i := 0; i < 2; i++ {
 		var response testServerResponse
-		err := backend.Call("get", "/hello", "sk_test_xyz", params, &response)
+		err := backend.Call("GET", "/hello", "sk_test_xyz", params, &response)
 
 		assert.NoError(t, err)
 		assert.Equal(t, message, response.Message)
@@ -817,6 +806,24 @@ func TestFormatURLPath(t *testing.T) {
 	// Tests that each parameter is escaped for use in URLs
 	assert.Equal(t, "/v1/resources/%25",
 		FormatURLPath("/v1/resources/%s", "%"))
+}
+
+func TestGetBackendWithConfig(t *testing.T) {
+	// No config overrides: https://github.com/stripe/stripe-go/issues/1894
+	{
+		config := &BackendConfig{}
+		_ = GetBackendWithConfig(
+			APIBackend,
+			config,
+		).(*BackendImplementation)
+
+		// Config properties left unchanged
+		assert.Nil(t, config.EnableTelemetry)
+		assert.Nil(t, config.HTTPClient)
+		assert.Nil(t, config.LeveledLogger)
+		assert.Nil(t, config.MaxNetworkRetries)
+		assert.Nil(t, config.URL)
+	}
 }
 
 func TestGetBackendWithConfig_Loggers(t *testing.T) {
@@ -1271,6 +1278,213 @@ func TestBoolSlice(t *testing.T) {
 	assert.Equal(t, false, *result[3])
 
 	assert.Equal(t, 0, len(BoolSlice(nil)))
+}
+
+func TestRawRequestPreviewPost(t *testing.T) {
+	var body string
+	var path string
+	var method string
+	var contentType string
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req, _ := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		body = string(req)
+		path = r.URL.RequestURI()
+		method = r.Method
+		contentType = r.Header.Get("Content-Type")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"object": "abc", "xyz": {"def": "jih"}}`))
+	}))
+
+	backend := GetBackendWithConfig(
+		APIBackend,
+		&BackendConfig{
+			LeveledLogger:     debugLeveledLogger,
+			MaxNetworkRetries: Int64(0),
+			URL:               String(testServer.URL),
+		},
+	).(*BackendImplementation)
+
+	type MyXYZ struct {
+		DEF string `json:"def"`
+	}
+	type MyABC struct {
+		Object string `json:"object"`
+		XYZ    MyXYZ  `json:"xyz"`
+	}
+	params := &RawParams{Params: Params{}}
+	response, err := backend.RawRequest(http.MethodPost, "/v2/abcs", "sk_test_xyz", `{"foo":"myFoo","bar":{"baz":false}}`, params)
+	assert.NoError(t, err)
+	myABC := &MyABC{}
+	assert.Nil(t, params.Headers)
+	assert.Equal(t, `{"foo":"myFoo","bar":{"baz":false}}`, body)
+	assert.Equal(t, `/v2/abcs`, path)
+	assert.Equal(t, `POST`, method)
+	assert.Equal(t, `application/json`, contentType)
+	// assert.Equal(t, previewVersion, stripeVersion)
+	err = json.Unmarshal(response.RawJSON, myABC)
+	assert.NoError(t, err)
+	assert.Equal(t, "jih", myABC.XYZ.DEF)
+	assert.Equal(t, "abc", myABC.Object)
+	defer testServer.Close()
+}
+
+func TestRawRequestStandardGet(t *testing.T) {
+	var body string
+	var path string
+	var method string
+	var contentType string
+	var stripeVersion string
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req, _ := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		body = string(req)
+		path = r.URL.RequestURI()
+		method = r.Method
+		contentType = r.Header.Get("Content-Type")
+		stripeVersion = r.Header.Get("Stripe-Version")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"object": "abc", "xyz": {"def": "jih"}}`))
+	}))
+
+	backend := GetBackendWithConfig(
+		APIBackend,
+		&BackendConfig{
+			LeveledLogger:     debugLeveledLogger,
+			MaxNetworkRetries: Int64(0),
+			URL:               String(testServer.URL),
+		},
+	).(*BackendImplementation)
+
+	_, err := backend.RawRequest(http.MethodGet, "/v1/abc?foo=myFoo", "sk_test_xyz", ``, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, ``, body)
+	assert.Equal(t, `/v1/abc?foo=myFoo`, path)
+	assert.Equal(t, `GET`, method)
+	assert.Equal(t, `application/x-www-form-urlencoded`, contentType)
+	assert.Equal(t, apiVersion, stripeVersion)
+	assert.NoError(t, err)
+	defer testServer.Close()
+}
+
+func TestRawRequestStandardPost(t *testing.T) {
+	var body string
+	var path string
+	var method string
+	var contentType string
+	var stripeVersion string
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req, _ := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		body = string(req)
+		path = r.URL.RequestURI()
+		method = r.Method
+		contentType = r.Header.Get("Content-Type")
+		stripeVersion = r.Header.Get("Stripe-Version")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"object": "abc", "xyz": {"def": "jih"}}`))
+	}))
+
+	backend := GetBackendWithConfig(
+		APIBackend,
+		&BackendConfig{
+			LeveledLogger:     debugLeveledLogger,
+			MaxNetworkRetries: Int64(0),
+			URL:               String(testServer.URL),
+		},
+	).(*BackendImplementation)
+
+	_, err := backend.RawRequest(http.MethodPost, "/v1/abc", "sk_test_xyz", `foo=myFoo`, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, `foo=myFoo`, body)
+	assert.Equal(t, `/v1/abc`, path)
+	assert.Equal(t, `POST`, method)
+	assert.Equal(t, `application/x-www-form-urlencoded`, contentType)
+	assert.Equal(t, apiVersion, stripeVersion)
+	assert.NoError(t, err)
+	defer testServer.Close()
+}
+
+func TestRawRequestPreviewGet(t *testing.T) {
+	var body string
+	var path string
+	var method string
+	var contentType string
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req, _ := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		body = string(req)
+		path = r.URL.RequestURI()
+		method = r.Method
+		contentType = r.Header.Get("Content-Type")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"object": "abc", "xyz": {"def": "jih"}}`))
+	}))
+
+	backend := GetBackendWithConfig(
+		APIBackend,
+		&BackendConfig{
+			LeveledLogger:     debugLeveledLogger,
+			MaxNetworkRetries: Int64(0),
+			URL:               String(testServer.URL),
+		},
+	).(*BackendImplementation)
+
+	params := &RawParams{Params: Params{}}
+	_, err := backend.RawRequest(http.MethodGet, "/v2/abc?foo=myFoo", "sk_test_xyz", ``, params)
+	assert.NoError(t, err)
+	assert.Equal(t, ``, body)
+	assert.Equal(t, `/v2/abc?foo=myFoo`, path)
+	assert.Equal(t, `GET`, method)
+	assert.Equal(t, `application/json`, contentType)
+	// assert.Equal(t, previewVersion, stripeVersion)
+	assert.NoError(t, err)
+	defer testServer.Close()
+}
+
+func TestRawRequestWithAdditionalHeaders(t *testing.T) {
+	var body string
+	var path string
+	var method string
+	var contentType string
+	var fooHeader string
+	var stripeContext string
+	testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req, _ := ioutil.ReadAll(r.Body)
+		r.Body.Close()
+		body = string(req)
+		path = r.URL.RequestURI()
+		method = r.Method
+		contentType = r.Header.Get("Content-Type")
+		fooHeader = r.Header.Get("foo")
+		stripeContext = r.Header.Get("Stripe-Context")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"object": "abc", "xyz": {"def": "jih"}}`))
+	}))
+
+	backend := GetBackendWithConfig(
+		APIBackend,
+		&BackendConfig{
+			LeveledLogger:     debugLeveledLogger,
+			MaxNetworkRetries: Int64(0),
+			URL:               String(testServer.URL),
+		},
+	).(*BackendImplementation)
+
+	headers := http.Header{}
+	headers.Set("foo", "bar")
+	params := &RawParams{Params: Params{Headers: headers}, StripeContext: "acct_123"}
+
+	_, err := backend.RawRequest(http.MethodPost, "/v2/abc", "sk_test_xyz", `{"foo":"myFoo"}`, params)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"foo":"myFoo"}`, body)
+	assert.Equal(t, `/v2/abc`, path)
+	assert.Equal(t, `POST`, method)
+	assert.Equal(t, `application/json`, contentType)
+	assert.Equal(t, `bar`, fooHeader)
+	assert.Equal(t, `acct_123`, stripeContext)
+	assert.NoError(t, err)
+	defer testServer.Close()
 }
 
 //

@@ -6,6 +6,15 @@
 
 package stripe
 
+// Type of the pretax credit amount referenced.
+type InvoiceLineItemPretaxCreditAmountType string
+
+// List of values that InvoiceLineItemPretaxCreditAmountType can take
+const (
+	InvoiceLineItemPretaxCreditAmountTypeCreditBalanceTransaction InvoiceLineItemPretaxCreditAmountType = "credit_balance_transaction"
+	InvoiceLineItemPretaxCreditAmountTypeDiscount                 InvoiceLineItemPretaxCreditAmountType = "discount"
+)
+
 // A string identifying the type of the source of this line item, either an `invoiceitem` or a `subscription`.
 type InvoiceLineItemType string
 
@@ -15,12 +24,14 @@ const (
 	InvoiceLineItemTypeSubscription InvoiceLineItemType = "subscription"
 )
 
-// The coupons & existing discounts which apply to the line item. Item discounts are applied before invoice discounts. Pass an empty string to remove previously-defined discounts.
+// The coupons, promotion codes & existing discounts which apply to the line item. Item discounts are applied before invoice discounts. Pass an empty string to remove previously-defined discounts.
 type InvoiceLineItemDiscountParams struct {
 	// ID of the coupon to create a new discount for.
 	Coupon *string `form:"coupon"`
 	// ID of an existing discount on the object (or one of its ancestors) to reuse.
 	Discount *string `form:"discount"`
+	// ID of the promotion code to create a new discount for.
+	PromotionCode *string `form:"promotion_code"`
 }
 
 // The period associated with this invoice item. When set to different values, the period will be rendered on the invoice. If you have [Stripe Revenue Recognition](https://stripe.com/docs/revenue-recognition) enabled, the period will be used to recognize and defer revenue. See the [Revenue Recognition documentation](https://stripe.com/docs/revenue-recognition/methodology/subscriptions-and-invoicing) for details.
@@ -54,7 +65,7 @@ func (p *InvoiceLineItemPriceDataProductDataParams) AddMetadata(key string, valu
 	p.Metadata[key] = value
 }
 
-// Data used to generate a new [Price](https://stripe.com/docs/api/prices) object inline.
+// Data used to generate a new [Price](https://stripe.com/docs/api/prices) object inline. One of `price` or `price_data` is required.
 type InvoiceLineItemPriceDataParams struct {
 	// Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a [supported currency](https://stripe.com/docs/currencies).
 	Currency *string `form:"currency"`
@@ -117,17 +128,17 @@ type InvoiceLineItemParams struct {
 	Description *string `form:"description"`
 	// Controls whether discounts apply to this line item. Defaults to false for prorations or negative line items, and true for all other line items. Cannot be set to true for prorations.
 	Discountable *bool `form:"discountable"`
-	// The coupons & existing discounts which apply to the line item. Item discounts are applied before invoice discounts. Pass an empty string to remove previously-defined discounts.
+	// The coupons, promotion codes & existing discounts which apply to the line item. Item discounts are applied before invoice discounts. Pass an empty string to remove previously-defined discounts.
 	Discounts []*InvoiceLineItemDiscountParams `form:"discounts"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
-	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
+	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`. For [type=subscription](https://stripe.com/docs/api/invoices/line_item#invoice_line_item_object-type) line items, the incoming metadata specified on the request is directly used to set this value, in contrast to [type=invoiceitem](api/invoices/line_item#invoice_line_item_object-type) line items, where any existing metadata on the invoice line is merged with the incoming data.
 	Metadata map[string]string `form:"metadata"`
 	// The period associated with this invoice item. When set to different values, the period will be rendered on the invoice. If you have [Stripe Revenue Recognition](https://stripe.com/docs/revenue-recognition) enabled, the period will be used to recognize and defer revenue. See the [Revenue Recognition documentation](https://stripe.com/docs/revenue-recognition/methodology/subscriptions-and-invoicing) for details.
 	Period *InvoiceLineItemPeriodParams `form:"period"`
-	// The ID of the price object.
+	// The ID of the price object. One of `price` or `price_data` is required.
 	Price *string `form:"price"`
-	// Data used to generate a new [Price](https://stripe.com/docs/api/prices) object inline.
+	// Data used to generate a new [Price](https://stripe.com/docs/api/prices) object inline. One of `price` or `price_data` is required.
 	PriceData *InvoiceLineItemPriceDataParams `form:"price_data"`
 	// Non-negative integer. The quantity of units for the line item.
 	Quantity *int64 `form:"quantity"`
@@ -159,6 +170,18 @@ type InvoiceLineItemDiscountAmount struct {
 	Discount *Discount `json:"discount"`
 }
 
+// Contains pretax credit amounts (ex: discount, credit grants, etc) that apply to this line item.
+type InvoiceLineItemPretaxCreditAmount struct {
+	// The amount, in cents (or local equivalent), of the pretax credit amount.
+	Amount int64 `json:"amount"`
+	// The credit balance transaction that was applied to get this pretax credit amount.
+	CreditBalanceTransaction *BillingCreditBalanceTransaction `json:"credit_balance_transaction"`
+	// The discount that was applied to get this pretax credit amount.
+	Discount *Discount `json:"discount"`
+	// Type of the pretax credit amount referenced.
+	Type InvoiceLineItemPretaxCreditAmountType `json:"type"`
+}
+
 // For a credit proration `line_item`, the original debit line_items to which the credit proration applies.
 type InvoiceLineItemProrationDetailsCreditedItems struct {
 	// Invoice containing the credited invoice line items
@@ -172,6 +195,10 @@ type InvoiceLineItemProrationDetails struct {
 	// For a credit proration `line_item`, the original debit line_items to which the credit proration applies.
 	CreditedItems *InvoiceLineItemProrationDetailsCreditedItems `json:"credited_items"`
 }
+
+// Invoice Line Items represent the individual lines within an [invoice](https://stripe.com/docs/api/invoices) and only exist within the context of an invoice.
+//
+// Each line item is backed by either an [invoice item](https://stripe.com/docs/api/invoiceitems) or a [subscription item](https://stripe.com/docs/api/subscription_items).
 type InvoiceLineItem struct {
 	APIResource
 	// The amount, in cents (or local equivalent).
@@ -196,13 +223,15 @@ type InvoiceLineItem struct {
 	InvoiceItem *InvoiceItem `json:"invoice_item"`
 	// Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
 	Livemode bool `json:"livemode"`
-	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Note that for line items with `type=subscription` this will reflect the metadata of the subscription that caused the line item to be created.
+	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Note that for line items with `type=subscription`, `metadata` reflects the current metadata from the subscription associated with the line item, unless the invoice line was directly updated with different metadata after creation.
 	Metadata map[string]string `json:"metadata"`
 	// String representing the object's type. Objects of the same type share the same value.
 	Object string  `json:"object"`
 	Period *Period `json:"period"`
 	// The plan of the subscription, if the line item is a subscription or a proration.
 	Plan *Plan `json:"plan"`
+	// Contains pretax credit amounts (ex: discount, credit grants, etc) that apply to this line item.
+	PretaxCreditAmounts []*InvoiceLineItemPretaxCreditAmount `json:"pretax_credit_amounts"`
 	// The price of the line item.
 	Price *Price `json:"price"`
 	// Whether this is a proration.

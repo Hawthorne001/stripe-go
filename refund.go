@@ -51,7 +51,7 @@ const (
 	RefundStatusRequiresAction RefundStatus = "requires_action"
 )
 
-// Returns a list of all refunds you created. We return the refunds in sorted order, with the most recent refunds appearing first The 10 most recent refunds are always available by default on the Charge object.
+// Returns a list of all refunds you created. We return the refunds in sorted order, with the most recent refunds appearing first. The 10 most recent refunds are always available by default on the Charge object.
 type RefundListParams struct {
 	ListParams `form:"*"`
 	// Only return refunds for the charge specified by this charge ID.
@@ -142,8 +142,12 @@ func (p *RefundCancelParams) AddExpand(f string) {
 type RefundDestinationDetailsAffirm struct{}
 type RefundDestinationDetailsAfterpayClearpay struct{}
 type RefundDestinationDetailsAlipay struct{}
+type RefundDestinationDetailsAlma struct{}
+type RefundDestinationDetailsAmazonPay struct{}
 type RefundDestinationDetailsAuBankTransfer struct{}
 type RefundDestinationDetailsBLIK struct {
+	// For refunds declined by the network, a decline code provided by the network which indicates the reason the refund failed.
+	NetworkDeclineCode string `json:"network_decline_code"`
 	// The reference assigned to the refund.
 	Reference string `json:"reference"`
 	// Status of the reference on the refund. This can be `pending`, `available` or `unavailable`.
@@ -189,6 +193,12 @@ type RefundDestinationDetailsJPBankTransfer struct {
 	ReferenceStatus string `json:"reference_status"`
 }
 type RefundDestinationDetailsKlarna struct{}
+type RefundDestinationDetailsMultibanco struct {
+	// The reference assigned to the refund.
+	Reference string `json:"reference"`
+	// Status of the reference on the refund. This can be `pending`, `available` or `unavailable`.
+	ReferenceStatus string `json:"reference_status"`
+}
 type RefundDestinationDetailsMXBankTransfer struct {
 	// The reference assigned to the refund.
 	Reference string `json:"reference"`
@@ -207,6 +217,8 @@ type RefundDestinationDetailsPix struct{}
 type RefundDestinationDetailsRevolut struct{}
 type RefundDestinationDetailsSofort struct{}
 type RefundDestinationDetailsSwish struct {
+	// For refunds declined by the network, a decline code provided by the network which indicates the reason the refund failed.
+	NetworkDeclineCode string `json:"network_decline_code"`
 	// The reference assigned to the refund.
 	Reference string `json:"reference"`
 	// Status of the reference on the refund. This can be `pending`, `available` or `unavailable`.
@@ -230,6 +242,8 @@ type RefundDestinationDetails struct {
 	Affirm              *RefundDestinationDetailsAffirm              `json:"affirm"`
 	AfterpayClearpay    *RefundDestinationDetailsAfterpayClearpay    `json:"afterpay_clearpay"`
 	Alipay              *RefundDestinationDetailsAlipay              `json:"alipay"`
+	Alma                *RefundDestinationDetailsAlma                `json:"alma"`
+	AmazonPay           *RefundDestinationDetailsAmazonPay           `json:"amazon_pay"`
 	AuBankTransfer      *RefundDestinationDetailsAuBankTransfer      `json:"au_bank_transfer"`
 	BLIK                *RefundDestinationDetailsBLIK                `json:"blik"`
 	BrBankTransfer      *RefundDestinationDetailsBrBankTransfer      `json:"br_bank_transfer"`
@@ -243,6 +257,7 @@ type RefundDestinationDetails struct {
 	Grabpay             *RefundDestinationDetailsGrabpay             `json:"grabpay"`
 	JPBankTransfer      *RefundDestinationDetailsJPBankTransfer      `json:"jp_bank_transfer"`
 	Klarna              *RefundDestinationDetailsKlarna              `json:"klarna"`
+	Multibanco          *RefundDestinationDetailsMultibanco          `json:"multibanco"`
 	MXBankTransfer      *RefundDestinationDetailsMXBankTransfer      `json:"mx_bank_transfer"`
 	P24                 *RefundDestinationDetailsP24                 `json:"p24"`
 	PayNow              *RefundDestinationDetailsPayNow              `json:"paynow"`
@@ -264,15 +279,12 @@ type RefundNextActionDisplayDetailsEmailSent struct {
 	// The recipient's email address.
 	EmailSentTo string `json:"email_sent_to"`
 }
-
-// Contains the refund details.
 type RefundNextActionDisplayDetails struct {
 	EmailSent *RefundNextActionDisplayDetailsEmailSent `json:"email_sent"`
 	// The expiry timestamp.
 	ExpiresAt int64 `json:"expires_at"`
 }
 type RefundNextAction struct {
-	// Contains the refund details.
 	DisplayDetails *RefundNextActionDisplayDetails `json:"display_details"`
 	// Type of the next action to perform.
 	Type string `json:"type"`

@@ -41,7 +41,7 @@ const (
 	TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccountAccountTypeSavings  TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccountAccountType = "savings"
 )
 
-// The US bank account network used to send funds.
+// The network rails used. See the [docs](https://stripe.com/docs/treasury/money-movement/timelines) to learn more about money movement timelines for each network type.
 type TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccountNetwork string
 
 // List of values that TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccountNetwork can take
@@ -77,6 +77,15 @@ const (
 	TreasuryOutboundPaymentStatusPosted     TreasuryOutboundPaymentStatus = "posted"
 	TreasuryOutboundPaymentStatusProcessing TreasuryOutboundPaymentStatus = "processing"
 	TreasuryOutboundPaymentStatusReturned   TreasuryOutboundPaymentStatus = "returned"
+)
+
+// The US bank account network used to send funds.
+type TreasuryOutboundPaymentTrackingDetailsType string
+
+// List of values that TreasuryOutboundPaymentTrackingDetailsType can take
+const (
+	TreasuryOutboundPaymentTrackingDetailsTypeACH            TreasuryOutboundPaymentTrackingDetailsType = "ach"
+	TreasuryOutboundPaymentTrackingDetailsTypeUSDomesticWire TreasuryOutboundPaymentTrackingDetailsType = "us_domestic_wire"
 )
 
 // Returns a list of OutboundPayments sent from the specified FinancialAccount.
@@ -152,7 +161,7 @@ func (p *TreasuryOutboundPaymentDestinationPaymentMethodDataParams) AddMetadata(
 
 // Optional fields for `us_bank_account`.
 type TreasuryOutboundPaymentDestinationPaymentMethodOptionsUSBankAccountParams struct {
-	// The US bank account network that must be used for this OutboundPayment. If not set, we will default to the PaymentMethod's preferred network.
+	// Specifies the network rails to be used. If not set, will default to the PaymentMethod's preferred network. See the [docs](https://stripe.com/docs/treasury/money-movement/timelines) to learn more about money movement timelines for each network type.
 	Network *string `form:"network"`
 }
 
@@ -249,7 +258,9 @@ type TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccount struct 
 	Fingerprint string `json:"fingerprint"`
 	// Last four digits of the bank account number.
 	Last4 string `json:"last4"`
-	// The US bank account network used to send funds.
+	// ID of the mandate used to make this payment.
+	Mandate *Mandate `json:"mandate"`
+	// The network rails used. See the [docs](https://stripe.com/docs/treasury/money-movement/timelines) to learn more about money movement timelines for each network type.
 	Network TreasuryOutboundPaymentDestinationPaymentMethodDetailsUSBankAccountNetwork `json:"network"`
 	// Routing number of the bank account.
 	RoutingNumber string `json:"routing_number"`
@@ -289,10 +300,32 @@ type TreasuryOutboundPaymentStatusTransitions struct {
 	// Timestamp describing when an OutboundPayment changed status to `returned`.
 	ReturnedAt int64 `json:"returned_at"`
 }
+type TreasuryOutboundPaymentTrackingDetailsACH struct {
+	// ACH trace ID of the OutboundPayment for payments sent over the `ach` network.
+	TraceID string `json:"trace_id"`
+}
+type TreasuryOutboundPaymentTrackingDetailsUSDomesticWire struct {
+	// CHIPS System Sequence Number (SSN) of the OutboundPayment for payments sent over the `us_domestic_wire` network.
+	Chips string `json:"chips"`
+	// IMAD of the OutboundPayment for payments sent over the `us_domestic_wire` network.
+	Imad string `json:"imad"`
+	// OMAD of the OutboundPayment for payments sent over the `us_domestic_wire` network.
+	Omad string `json:"omad"`
+}
 
-// Use OutboundPayments to send funds to another party's external bank account or [FinancialAccount](https://stripe.com/docs/api#financial_accounts). To send money to an account belonging to the same user, use an [OutboundTransfer](https://stripe.com/docs/api#outbound_transfers).
+// Details about network-specific tracking information if available.
+type TreasuryOutboundPaymentTrackingDetails struct {
+	ACH *TreasuryOutboundPaymentTrackingDetailsACH `json:"ach"`
+	// The US bank account network used to send funds.
+	Type           TreasuryOutboundPaymentTrackingDetailsType            `json:"type"`
+	USDomesticWire *TreasuryOutboundPaymentTrackingDetailsUSDomesticWire `json:"us_domestic_wire"`
+}
+
+// Use [OutboundPayments](https://docs.stripe.com/docs/treasury/moving-money/financial-accounts/out-of/outbound-payments) to send funds to another party's external bank account or [FinancialAccount](https://stripe.com/docs/api#financial_accounts). To send money to an account belonging to the same user, use an [OutboundTransfer](https://stripe.com/docs/api#outbound_transfers).
 //
 // Simulate OutboundPayment state changes with the `/v1/test_helpers/treasury/outbound_payments` endpoints. These methods can only be called on test mode objects.
+//
+// Related guide: [Moving money with Treasury using OutboundPayment objects](https://docs.stripe.com/docs/treasury/moving-money/financial-accounts/out-of/outbound-payments)
 type TreasuryOutboundPayment struct {
 	APIResource
 	// Amount (in cents) transferred.
@@ -334,6 +367,8 @@ type TreasuryOutboundPayment struct {
 	// Current status of the OutboundPayment: `processing`, `failed`, `posted`, `returned`, `canceled`. An OutboundPayment is `processing` if it has been created and is pending. The status changes to `posted` once the OutboundPayment has been "confirmed" and funds have left the account, or to `failed` or `canceled`. If an OutboundPayment fails to arrive at its destination, its status will change to `returned`.
 	Status            TreasuryOutboundPaymentStatus             `json:"status"`
 	StatusTransitions *TreasuryOutboundPaymentStatusTransitions `json:"status_transitions"`
+	// Details about network-specific tracking information if available.
+	TrackingDetails *TreasuryOutboundPaymentTrackingDetails `json:"tracking_details"`
 	// The Transaction associated with this object.
 	Transaction *TreasuryTransaction `json:"transaction"`
 }
