@@ -10,8 +10,8 @@ package session
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /checkout/sessions APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new checkout session.
+// Creates a Session object.
 func New(params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
 	return getC().New(params)
 }
 
-// New creates a new checkout session.
+// Creates a Session object.
 func (c Client) New(params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
 	session := &stripe.CheckoutSession{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/checkout/sessions",
-		c.Key,
-		params,
-		session,
-	)
+		http.MethodPost, "/v1/checkout/sessions", c.Key, params, session)
 	return session, err
 }
 
-// Get returns the details of a checkout session.
+// Retrieves a Session object.
 func Get(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a checkout session.
+// Retrieves a Session object.
 func (c Client) Get(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
 	path := stripe.FormatURLPath("/v1/checkout/sessions/%s", id)
 	session := &stripe.CheckoutSession{}
@@ -51,12 +46,29 @@ func (c Client) Get(id string, params *stripe.CheckoutSessionParams) (*stripe.Ch
 	return session, err
 }
 
-// Expire is the method for the `POST /v1/checkout/sessions/{session}/expire` API.
+// Updates a Session object.
+func Update(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+	return getC().Update(id, params)
+}
+
+// Updates a Session object.
+func (c Client) Update(id string, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+	path := stripe.FormatURLPath("/v1/checkout/sessions/%s", id)
+	session := &stripe.CheckoutSession{}
+	err := c.B.Call(http.MethodPost, path, c.Key, params, session)
+	return session, err
+}
+
+// A Session can be expired when it is in one of these statuses: open
+//
+// After it expires, a customer can't complete a Session and customers loading the Session see a message saying the Session is expired.
 func Expire(id string, params *stripe.CheckoutSessionExpireParams) (*stripe.CheckoutSession, error) {
 	return getC().Expire(id, params)
 }
 
-// Expire is the method for the `POST /v1/checkout/sessions/{session}/expire` API.
+// A Session can be expired when it is in one of these statuses: open
+//
+// After it expires, a customer can't complete a Session and customers loading the Session see a message saying the Session is expired.
 func (c Client) Expire(id string, params *stripe.CheckoutSessionExpireParams) (*stripe.CheckoutSession, error) {
 	path := stripe.FormatURLPath("/v1/checkout/sessions/%s/expire", id)
 	session := &stripe.CheckoutSession{}
@@ -64,12 +76,12 @@ func (c Client) Expire(id string, params *stripe.CheckoutSessionExpireParams) (*
 	return session, err
 }
 
-// List returns a list of checkout sessions.
+// Returns a list of Checkout Sessions.
 func List(params *stripe.CheckoutSessionListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of checkout sessions.
+// Returns a list of Checkout Sessions.
 func (c Client) List(listParams *stripe.CheckoutSessionListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
@@ -103,17 +115,16 @@ func (i *Iter) CheckoutSessionList() *stripe.CheckoutSessionList {
 	return i.List().(*stripe.CheckoutSessionList)
 }
 
-// ListLineItems is the method for the `GET /v1/checkout/sessions/{session}/line_items` API.
+// When retrieving a Checkout Session, there is an includable line_items property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
 func ListLineItems(params *stripe.CheckoutSessionListLineItemsParams) *LineItemIter {
 	return getC().ListLineItems(params)
 }
 
-// ListLineItems is the method for the `GET /v1/checkout/sessions/{session}/line_items` API.
+// When retrieving a Checkout Session, there is an includable line_items property containing the first handful of those items. There is also a URL where you can retrieve the full (paginated) list of line items.
 func (c Client) ListLineItems(listParams *stripe.CheckoutSessionListLineItemsParams) *LineItemIter {
 	path := stripe.FormatURLPath(
-		"/v1/checkout/sessions/%s/line_items",
-		stripe.StringValue(listParams.Session),
-	)
+		"/v1/checkout/sessions/%s/line_items", stripe.StringValue(
+			listParams.Session))
 	return &LineItemIter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
 			list := &stripe.LineItemList{}

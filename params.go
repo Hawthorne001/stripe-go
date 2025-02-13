@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/stripe/stripe-go/v76/form"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 //
@@ -172,6 +172,11 @@ type ListParamsContainer interface {
 	GetListParams() *ListParams
 }
 
+type APIMode string
+
+var V1APIMode APIMode = "v1"
+var V2APIMode APIMode = "v2"
+
 // Params is the structure that contains the common properties
 // of any *Params structure.
 type Params struct {
@@ -215,7 +220,7 @@ func (p *Params) AddExpand(f string) {
 // InternalSetUsage sets the usage field on the Params struct.
 // Unstable: for internal stripe-go usage only.
 func (p *Params) InternalSetUsage(usage []string) {
-	p.usage = usage
+	p.usage = append(p.usage, usage...)
 }
 
 // AddExtra adds a new arbitrary key-value pair to the request data
@@ -259,6 +264,11 @@ func (p *Params) SetStripeAccount(val string) {
 // its implementation of this interface.
 type ParamsContainer interface {
 	GetParams() *Params
+}
+
+type RawParams struct {
+	Params        `form:"*"`
+	StripeContext string `form:"-"`
 }
 
 // RangeQueryParams are a set of generic request parameters that are used on

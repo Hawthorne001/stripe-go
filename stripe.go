@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/stripe/stripe-go/v76/form"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 //
@@ -52,6 +52,10 @@ const (
 	// DefaultMaxNetworkRetries is the default maximum number of retries made
 	// by a Stripe client.
 	DefaultMaxNetworkRetries int64 = 2
+
+	MeterEventsBackend SupportedBackend = "meterevents"
+
+	MeterEventsURL = "https://meter-events.stripe.com"
 
 	// UnknownPlatform is the string returned as the system name if we couldn't get
 	// one from `uname`.
@@ -204,6 +208,10 @@ type Backend interface {
 	CallRaw(method, path, key string, body *form.Values, params *Params, v LastResponseSetter) error
 	CallMultipart(method, path, key, boundary string, body *bytes.Buffer, params *Params, v LastResponseSetter) error
 	SetMaxNetworkRetries(maxNetworkRetries int64)
+}
+
+type RawRequestBackend interface {
+	RawRequest(method, path, key, content string, params *RawParams) (*APIResponse, error)
 }
 
 // BackendConfig is used to configure a new Stripe backend.
@@ -417,14 +425,93 @@ func (s *BackendImplementation) CallMultipart(method, path, key, boundary string
 	return nil
 }
 
+// the stripe API only accepts GET / POST / DELETE
+func validateMethod(method string) error {
+	if method != http.MethodPost && method != http.MethodGet && method != http.MethodDelete {
+		return fmt.Errorf("method must be POST, GET, or DELETE. Received %s", method)
+	}
+	return nil
+}
+
+// RawRequest is the Backend.RawRequest implementation for invoking Stripe APIs.
+func (s *BackendImplementation) RawRequest(method, path, key, content string, params *RawParams) (*APIResponse, error) {
+	var bodyBuffer = bytes.NewBuffer(nil)
+	var commonParams *Params
+	var err error
+	var contentType string
+
+	err = validateMethod(method)
+	if err != nil {
+		return nil, err
+	}
+
+	paramsIsNil := params == nil || reflect.ValueOf(params).IsNil()
+	var apiMode APIMode
+	if strings.HasPrefix(path, "/v1") {
+		apiMode = V1APIMode
+	} else if strings.HasPrefix(path, "/v2") {
+		apiMode = V2APIMode
+	} else {
+		return nil, fmt.Errorf("Unknown path prefix %s", path)
+	}
+
+	_, commonParams, err = extractParams(params)
+	if err != nil {
+		return nil, err
+	}
+
+	if apiMode == V1APIMode {
+		contentType = "application/x-www-form-urlencoded"
+	} else if apiMode == V2APIMode {
+		contentType = "application/json"
+	} else {
+		return nil, fmt.Errorf("Unknown API mode %s", apiMode)
+	}
+
+	bodyBuffer.WriteString(content)
+
+	req, err := s.NewRequest(method, path, key, contentType, commonParams)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !paramsIsNil {
+		if params.StripeContext != "" {
+			req.Header.Set("Stripe-Context", params.StripeContext)
+		}
+	}
+
+	handleResponse := func(res *http.Response, err error) (interface{}, error) {
+		return s.handleResponseBufferingErrors(res, err)
+	}
+
+	resp, result, requestDuration, err := s.requestWithRetriesAndTelemetry(req, bodyBuffer, handleResponse)
+	if err != nil {
+		return nil, err
+	}
+	requestID := resp.Header.Get("Request-Id")
+	s.maybeEnqueueTelemetryMetrics(requestID, requestDuration, []string{"raw_request"})
+	body, err := ioutil.ReadAll(result.(io.ReadCloser))
+	if err != nil {
+		return nil, err
+	}
+	return newAPIResponse(resp, body, requestDuration), nil
+}
+
 // CallRaw is the implementation for invoking Stripe APIs internally without a backend.
 func (s *BackendImplementation) CallRaw(method, path, key string, form *form.Values, params *Params, v LastResponseSetter) error {
 	var body string
 	if form != nil && !form.Empty() {
 		body = form.Encode()
 
-		// On `GET`, move the payload into the URL
-		if method == http.MethodGet {
+		err := validateMethod(method)
+		if err != nil {
+			return err
+		}
+
+		// On `GET` / `DELETE`, move the payload into the URL
+		if method != http.MethodPost {
 			path += "?" + body
 			body = ""
 		}
@@ -670,36 +757,39 @@ func (s *BackendImplementation) logError(statusCode int, err error) {
 	}
 }
 
+func (s *BackendImplementation) handleResponseBufferingErrors(res *http.Response, err error) (io.ReadCloser, error) {
+	// Some sort of connection error
+	if err != nil {
+		s.LeveledLogger.Errorf("Request failed with error: %v", err)
+		return res.Body, err
+	}
+
+	// Successful response, return the body ReadCloser
+	if res.StatusCode < 400 {
+		return res.Body, err
+	}
+
+	// Failure: try and parse the json of the response
+	// when logging the error
+	var resBody []byte
+	resBody, err = ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	if err == nil {
+		err = s.ResponseToError(res, resBody)
+	} else {
+		s.logError(res.StatusCode, err)
+	}
+
+	return res.Body, err
+}
+
 // DoStreaming is used by CallStreaming to execute an API request. It uses the
 // backend's HTTP client to execure the request.  In successful cases, it sets
 // a StreamingLastResponse onto v, but in unsuccessful cases handles unmarshaling
 // errors returned by the API.
 func (s *BackendImplementation) DoStreaming(req *http.Request, body *bytes.Buffer, v StreamingLastResponseSetter) error {
 	handleResponse := func(res *http.Response, err error) (interface{}, error) {
-
-		// Some sort of connection error
-		if err != nil {
-			s.LeveledLogger.Errorf("Request failed with error: %v", err)
-			return res.Body, err
-		}
-
-		// Successful response, return the body ReadCloser
-		if res.StatusCode < 400 {
-			return res.Body, err
-		}
-
-		// Failure: try and parse the json of the response
-		// when logging the error
-		var resBody []byte
-		resBody, err = ioutil.ReadAll(res.Body)
-		res.Body.Close()
-		if err == nil {
-			err = s.ResponseToError(res, resBody)
-		} else {
-			s.logError(res.StatusCode, err)
-		}
-
-		return res.Body, err
+		return s.handleResponseBufferingErrors(res, err)
 	}
 
 	resp, result, requestDuration, err := s.requestWithRetriesAndTelemetry(req, body, handleResponse)
@@ -929,16 +1019,12 @@ func (s *BackendImplementation) shouldRetry(err error, req *http.Request, resp *
 		}
 	}
 
-	// 500 Internal Server Error
+	// Retry on 500, 503, and other internal errors.
 	//
-	// We only bother retrying these for non-POST requests. POSTs end up being
-	// cached by the idempotency layer so there's no purpose in retrying them.
-	if resp.StatusCode >= http.StatusInternalServerError && req.Method != http.MethodPost {
-		return true, ""
-	}
-
-	// 503 Service Unavailable
-	if resp.StatusCode == http.StatusServiceUnavailable {
+	// Note that we expect the stripe-should-retry header to be false
+	// in most cases when a 500 is returned, since our idempotency framework
+	// would typically replay it anyway.
+	if resp.StatusCode >= http.StatusInternalServerError {
 		return true, ""
 	}
 
@@ -1106,48 +1192,65 @@ func GetBackend(backendType SupportedBackend) Backend {
 // configuration struct that will configure certain aspects of the backend
 // that's return.
 func GetBackendWithConfig(backendType SupportedBackend, config *BackendConfig) Backend {
-	if config.HTTPClient == nil {
-		config.HTTPClient = httpClient
+	cfg := *config
+	if cfg.HTTPClient == nil {
+		cfg.HTTPClient = httpClient
 	}
 
-	if config.LeveledLogger == nil {
-		config.LeveledLogger = DefaultLeveledLogger
+	if cfg.LeveledLogger == nil {
+		cfg.LeveledLogger = DefaultLeveledLogger
 	}
 
-	if config.MaxNetworkRetries == nil {
-		config.MaxNetworkRetries = Int64(DefaultMaxNetworkRetries)
+	if cfg.MaxNetworkRetries == nil {
+		cfg.MaxNetworkRetries = Int64(DefaultMaxNetworkRetries)
 	}
 
 	switch backendType {
 	case APIBackend:
-		if config.URL == nil {
-			config.URL = String(APIURL)
+		if cfg.URL == nil {
+			cfg.URL = String(APIURL)
 		}
 
-		config.URL = String(normalizeURL(*config.URL))
+		cfg.URL = String(normalizeURL(*cfg.URL))
 
-		return newBackendImplementation(backendType, config)
+		return newBackendImplementation(backendType, &cfg)
 
 	case UploadsBackend:
-		if config.URL == nil {
-			config.URL = String(UploadsURL)
+		if cfg.URL == nil {
+			cfg.URL = String(UploadsURL)
 		}
 
-		config.URL = String(normalizeURL(*config.URL))
+		cfg.URL = String(normalizeURL(*cfg.URL))
 
-		return newBackendImplementation(backendType, config)
+		return newBackendImplementation(backendType, &cfg)
 
 	case ConnectBackend:
-		if config.URL == nil {
-			config.URL = String(ConnectURL)
+		if cfg.URL == nil {
+			cfg.URL = String(ConnectURL)
 		}
 
-		config.URL = String(normalizeURL(*config.URL))
+		cfg.URL = String(normalizeURL(*cfg.URL))
 
-		return newBackendImplementation(backendType, config)
+		return newBackendImplementation(backendType, &cfg)
+
+	case MeterEventsBackend:
+		if cfg.URL == nil {
+			cfg.URL = String(MeterEventsURL)
+		}
+
+		cfg.URL = String(normalizeURL(*cfg.URL))
+
+		return newBackendImplementation(backendType, &cfg)
 	}
 
 	return nil
+}
+
+func GetRawRequestBackend(backendType SupportedBackend) (RawRequestBackend, error) {
+	if bi, ok := GetBackend(backendType).(RawRequestBackend); ok {
+		return bi, nil
+	}
+	return nil, fmt.Errorf("Error: cannot call RawRequest if requested backend type is initialized with a backend that doesn't implement RawRequestBackend")
 }
 
 // Int64 returns a pointer to the int64 value passed in.
@@ -1283,7 +1386,7 @@ func StringSlice(v []string) []*string {
 //
 
 // clientversion is the binding version
-const clientversion = "76.19.0"
+const clientversion = "81.3.1"
 
 // defaultHTTPTimeout is the default timeout on the http.Client used by the library.
 // This is chosen to be consistent with the other Stripe language libraries and
@@ -1497,4 +1600,45 @@ func normalizeURL(url string) string {
 	url = strings.TrimSuffix(url, "/v1")
 
 	return url
+}
+
+func RawRequest(method, path string, content string, params *RawParams) (*APIResponse, error) {
+	if bi, ok := GetBackend(APIBackend).(RawRequestBackend); ok {
+		return bi.RawRequest(method, path, Key, content, params)
+	}
+	return nil, fmt.Errorf("Error: cannot call RawRequest if backends.API is initialized with a backend that doesn't implement RawRequestBackend")
+}
+
+// UsageBackend is a wrapper for stripe.Backend that sets the usage parameter
+type UsageBackend struct {
+	B     Backend
+	Usage []string
+}
+
+func (u *UsageBackend) Call(method, path, key string, params ParamsContainer, v LastResponseSetter) error {
+	if r := reflect.ValueOf(params); r.Kind() == reflect.Ptr && !r.IsNil() {
+		params.GetParams().InternalSetUsage(u.Usage)
+	}
+	return u.B.Call(method, path, key, params, v)
+}
+
+func (u *UsageBackend) CallRaw(method, path, key string, body *form.Values, params *Params, v LastResponseSetter) error {
+	params.GetParams().InternalSetUsage(u.Usage)
+	return u.B.CallRaw(method, path, key, body, params, v)
+}
+
+func (u *UsageBackend) CallMultipart(method, path, key, boundary string, body *bytes.Buffer, params *Params, v LastResponseSetter) error {
+	params.GetParams().InternalSetUsage(u.Usage)
+	return u.B.CallMultipart(method, path, key, boundary, body, params, v)
+}
+
+func (u *UsageBackend) CallStreaming(method, path, key string, params ParamsContainer, v StreamingLastResponseSetter) error {
+	if r := reflect.ValueOf(params); r.Kind() == reflect.Ptr && !r.IsNil() {
+		params.GetParams().InternalSetUsage(u.Usage)
+	}
+	return u.B.CallStreaming(method, path, key, params, v)
+}
+
+func (u *UsageBackend) SetMaxNetworkRetries(maxNetworkRetries int64) {
+	u.B.SetMaxNetworkRetries(maxNetworkRetries)
 }

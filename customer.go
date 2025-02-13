@@ -77,7 +77,7 @@ type CustomerParams struct {
 	Phone *string `form:"phone"`
 	// Customer's preferred languages, ordered by preference.
 	PreferredLocales []*string `form:"preferred_locales"`
-	// The API ID of a promotion code to apply to the customer. The customer will have a discount applied on all recurring payments. Charges you create through the API will not have the discount.
+	// The ID of a promotion code to apply to the customer. The customer will have a discount applied on all recurring payments. Charges you create through the API will not have the discount.
 	PromotionCode *string `form:"promotion_code"`
 	// The customer's shipping information. Appears on invoices emailed to this customer.
 	Shipping *CustomerShippingParams `form:"shipping"`
@@ -123,9 +123,9 @@ type CustomerCashBalanceParams struct {
 
 // The list of up to 4 default custom fields to be displayed on invoices for this customer. When updating, pass an empty string to remove previously-defined fields.
 type CustomerInvoiceSettingsCustomFieldParams struct {
-	// The name of the custom field. This may be up to 30 characters.
+	// The name of the custom field. This may be up to 40 characters.
 	Name *string `form:"name"`
-	// The value of the custom field. This may be up to 30 characters.
+	// The value of the custom field. This may be up to 140 characters.
 	Value *string `form:"value"`
 }
 
@@ -133,6 +133,8 @@ type CustomerInvoiceSettingsCustomFieldParams struct {
 type CustomerInvoiceSettingsRenderingOptionsParams struct {
 	// How line-item prices and amounts will be displayed with respect to tax on invoice PDFs. One of `exclude_tax` or `include_inclusive_tax`. `include_inclusive_tax` will include inclusive tax (and exclude exclusive tax) in invoice PDF amounts. `exclude_tax` will exclude all tax (inclusive and exclusive alike) from invoice PDF amounts.
 	AmountTaxDisplay *string `form:"amount_tax_display"`
+	// ID of the invoice rendering template to use for future invoices.
+	Template *string `form:"template"`
 }
 
 // Default invoice settings for this customer.
@@ -192,7 +194,7 @@ func (p *CustomerListParams) AddExpand(f string) {
 
 // The customer's tax IDs.
 type CustomerTaxIDDataParams struct {
-	// Type of the tax ID, one of `ad_nrt`, `ae_trn`, `ar_cuit`, `au_abn`, `au_arn`, `bg_uic`, `bo_tin`, `br_cnpj`, `br_cpf`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `ch_vat`, `cl_tin`, `cn_tin`, `co_nit`, `cr_tin`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `eu_oss_vat`, `eu_vat`, `gb_vat`, `ge_vat`, `hk_br`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kr_brn`, `li_uid`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `no_vat`, `no_voec`, `nz_gst`, `pe_ruc`, `ph_tin`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sv_nit`, `th_vat`, `tr_tin`, `tw_vat`, `ua_vat`, `us_ein`, `uy_ruc`, `ve_rif`, `vn_tin`, or `za_vat`
+	// Type of the tax ID, one of `ad_nrt`, `ae_trn`, `al_tin`, `am_tin`, `ao_tin`, `ar_cuit`, `au_abn`, `au_arn`, `ba_tin`, `bb_tin`, `bg_uic`, `bh_vat`, `bo_tin`, `br_cnpj`, `br_cpf`, `bs_tin`, `by_tin`, `ca_bn`, `ca_gst_hst`, `ca_pst_bc`, `ca_pst_mb`, `ca_pst_sk`, `ca_qst`, `cd_nif`, `ch_uid`, `ch_vat`, `cl_tin`, `cn_tin`, `co_nit`, `cr_tin`, `de_stn`, `do_rcn`, `ec_ruc`, `eg_tin`, `es_cif`, `eu_oss_vat`, `eu_vat`, `gb_vat`, `ge_vat`, `gn_nif`, `hk_br`, `hr_oib`, `hu_tin`, `id_npwp`, `il_vat`, `in_gst`, `is_vat`, `jp_cn`, `jp_rn`, `jp_trn`, `ke_pin`, `kh_tin`, `kr_brn`, `kz_bin`, `li_uid`, `li_vat`, `ma_vat`, `md_vat`, `me_pib`, `mk_vat`, `mr_nif`, `mx_rfc`, `my_frp`, `my_itn`, `my_sst`, `ng_tin`, `no_vat`, `no_voec`, `np_pan`, `nz_gst`, `om_vat`, `pe_ruc`, `ph_tin`, `ro_tin`, `rs_pib`, `ru_inn`, `ru_kpp`, `sa_vat`, `sg_gst`, `sg_uen`, `si_tin`, `sn_ninea`, `sr_fin`, `sv_nit`, `th_vat`, `tj_tin`, `tr_tin`, `tw_vat`, `tz_vat`, `ua_vat`, `ug_tin`, `us_ein`, `uy_ruc`, `uz_tin`, `uz_vat`, `ve_rif`, `vn_tin`, `za_vat`, `zm_tin`, or `zw_tin`
 	Type *string `form:"type"`
 	// Value of the tax ID.
 	Value *string `form:"value"`
@@ -202,6 +204,8 @@ type CustomerTaxIDDataParams struct {
 type CustomerListPaymentMethodsParams struct {
 	ListParams `form:"*"`
 	Customer   *string `form:"-"` // Included in URL
+	// This field indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved payment method in a checkout flow. The field defaults to `unspecified`.
+	AllowRedisplay *string `form:"allow_redisplay"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
 	// An optional filter on the list, based on the object `type` field. Without the filter, the list includes all current and future payment method types. If your integration expects only one type of payment method in the response, make sure to provide a type value in the request.
@@ -293,6 +297,8 @@ type CustomerInvoiceSettingsCustomField struct {
 type CustomerInvoiceSettingsRenderingOptions struct {
 	// How line-item prices and amounts will be displayed with respect to tax on invoice PDFs.
 	AmountTaxDisplay string `json:"amount_tax_display"`
+	// ID of the invoice rendering template to be used for this customer's invoices. If set, the template will be used on all invoices for this customer unless a template is set directly on the invoice.
+	Template string `json:"template"`
 }
 type CustomerInvoiceSettings struct {
 	// Default custom fields to be displayed on invoices for this customer.
@@ -323,9 +329,8 @@ type CustomerTax struct {
 	Location *CustomerTaxLocation `json:"location"`
 }
 
-// This object represents a customer of your business. Use it to create recurring charges and track payments that belong to the same customer.
-//
-// Related guide: [Save a card during payment](https://stripe.com/docs/payments/save-during-payment)
+// This object represents a customer of your business. Use it to [create recurring charges](https://stripe.com/docs/invoicing/customer), [save payment](https://stripe.com/docs/payments/save-during-payment) and contact information,
+// and track payments that belong to the same customer.
 type Customer struct {
 	APIResource
 	// The customer's address.
@@ -368,7 +373,7 @@ type Customer struct {
 	Metadata map[string]string `json:"metadata"`
 	// The customer's full name or business name.
 	Name string `json:"name"`
-	// The suffix of the customer's next invoice number (for example, 0001).
+	// The suffix of the customer's next invoice number (for example, 0001). When the account uses account level sequencing, this parameter is ignored in API requests and the field omitted in API responses.
 	NextInvoiceSequence int64 `json:"next_invoice_sequence"`
 	// String representing the object's type. Objects of the same type share the same value.
 	Object string `json:"object"`

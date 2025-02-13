@@ -11,8 +11,8 @@ package valuelistitem
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /radar/value_list_items APIs.
@@ -21,30 +21,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new radar value list item.
+// Creates a new ValueListItem object, which is added to the specified parent value list.
 func New(params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	return getC().New(params)
 }
 
-// New creates a new radar value list item.
+// Creates a new ValueListItem object, which is added to the specified parent value list.
 func (c Client) New(params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	valuelistitem := &stripe.RadarValueListItem{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/radar/value_list_items",
-		c.Key,
-		params,
-		valuelistitem,
-	)
+		http.MethodPost, "/v1/radar/value_list_items", c.Key, params, valuelistitem)
 	return valuelistitem, err
 }
 
-// Get returns the details of a radar value list item.
+// Retrieves a ValueListItem object.
 func Get(id string, params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a radar value list item.
+// Retrieves a ValueListItem object.
 func (c Client) Get(id string, params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	path := stripe.FormatURLPath("/v1/radar/value_list_items/%s", id)
 	valuelistitem := &stripe.RadarValueListItem{}
@@ -52,12 +47,12 @@ func (c Client) Get(id string, params *stripe.RadarValueListItemParams) (*stripe
 	return valuelistitem, err
 }
 
-// Del removes a radar value list item.
+// Deletes a ValueListItem object, removing it from its parent value list.
 func Del(id string, params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	return getC().Del(id, params)
 }
 
-// Del removes a radar value list item.
+// Deletes a ValueListItem object, removing it from its parent value list.
 func (c Client) Del(id string, params *stripe.RadarValueListItemParams) (*stripe.RadarValueListItem, error) {
 	path := stripe.FormatURLPath("/v1/radar/value_list_items/%s", id)
 	valuelistitem := &stripe.RadarValueListItem{}
@@ -65,12 +60,12 @@ func (c Client) Del(id string, params *stripe.RadarValueListItemParams) (*stripe
 	return valuelistitem, err
 }
 
-// List returns a list of radar value list items.
+// Returns a list of ValueListItem objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
 func List(params *stripe.RadarValueListItemListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of radar value list items.
+// Returns a list of ValueListItem objects. The objects are sorted in descending order by creation date, with the most recently created object appearing first.
 func (c Client) List(listParams *stripe.RadarValueListItemListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

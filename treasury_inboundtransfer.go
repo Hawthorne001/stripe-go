@@ -52,7 +52,7 @@ const (
 	TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccountAccountTypeSavings  TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccountAccountType = "savings"
 )
 
-// The US bank account network used to debit funds.
+// The network rails used. See the [docs](https://stripe.com/docs/treasury/money-movement/timelines) to learn more about money movement timelines for each network type.
 type TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccountNetwork string
 
 // List of values that TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccountNetwork can take
@@ -161,7 +161,9 @@ type TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccount struct {
 	Fingerprint string `json:"fingerprint"`
 	// Last four digits of the bank account number.
 	Last4 string `json:"last4"`
-	// The US bank account network used to debit funds.
+	// ID of the mandate used to make this payment.
+	Mandate *Mandate `json:"mandate"`
+	// The network rails used. See the [docs](https://stripe.com/docs/treasury/money-movement/timelines) to learn more about money movement timelines for each network type.
 	Network TreasuryInboundTransferOriginPaymentMethodDetailsUSBankAccountNetwork `json:"network"`
 	// Routing number of the bank account.
 	RoutingNumber string `json:"routing_number"`
@@ -183,7 +185,9 @@ type TreasuryInboundTransferStatusTransitions struct {
 	SucceededAt int64 `json:"succeeded_at"`
 }
 
-// Use [InboundTransfers](https://stripe.com/docs/treasury/moving-money/financial-accounts/into/inbound-transfers) to add funds to your [FinancialAccount](https://stripe.com/docs/api#financial_accounts) via a PaymentMethod that is owned by you. The funds will be transferred via an ACH debit.
+// Use [InboundTransfers](https://docs.stripe.com/docs/treasury/moving-money/financial-accounts/into/inbound-transfers) to add funds to your [FinancialAccount](https://stripe.com/docs/api#financial_accounts) via a PaymentMethod that is owned by you. The funds will be transferred via an ACH debit.
+//
+// Related guide: [Moving money with Treasury using InboundTransfer objects](https://docs.stripe.com/docs/treasury/moving-money/financial-accounts/into/inbound-transfers)
 type TreasuryInboundTransfer struct {
 	APIResource
 	// Amount (in cents) transferred.

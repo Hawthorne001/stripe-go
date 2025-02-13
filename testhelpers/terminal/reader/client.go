@@ -10,7 +10,7 @@ package reader
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /terminal/readers APIs.
@@ -19,17 +19,15 @@ type Client struct {
 	Key string
 }
 
-// PresentPaymentMethod is the method for the `POST /v1/test_helpers/terminal/readers/{reader}/present_payment_method` API.
+// Presents a payment method on a simulated reader. Can be used to simulate accepting a payment, saving a card or refunding a transaction.
 func PresentPaymentMethod(id string, params *stripe.TestHelpersTerminalReaderPresentPaymentMethodParams) (*stripe.TerminalReader, error) {
 	return getC().PresentPaymentMethod(id, params)
 }
 
-// PresentPaymentMethod is the method for the `POST /v1/test_helpers/terminal/readers/{reader}/present_payment_method` API.
+// Presents a payment method on a simulated reader. Can be used to simulate accepting a payment, saving a card or refunding a transaction.
 func (c Client) PresentPaymentMethod(id string, params *stripe.TestHelpersTerminalReaderPresentPaymentMethodParams) (*stripe.TerminalReader, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/terminal/readers/%s/present_payment_method",
-		id,
-	)
+		"/v1/test_helpers/terminal/readers/%s/present_payment_method", id)
 	reader := &stripe.TerminalReader{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, reader)
 	return reader, err

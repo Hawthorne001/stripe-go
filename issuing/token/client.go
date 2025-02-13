@@ -10,8 +10,8 @@ package token
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /issuing/tokens APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// Get returns the details of an issuing token.
+// Retrieves an Issuing Token object.
 func Get(id string, params *stripe.IssuingTokenParams) (*stripe.IssuingToken, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of an issuing token.
+// Retrieves an Issuing Token object.
 func (c Client) Get(id string, params *stripe.IssuingTokenParams) (*stripe.IssuingToken, error) {
 	path := stripe.FormatURLPath("/v1/issuing/tokens/%s", id)
 	token := &stripe.IssuingToken{}
@@ -33,12 +33,12 @@ func (c Client) Get(id string, params *stripe.IssuingTokenParams) (*stripe.Issui
 	return token, err
 }
 
-// Update updates an issuing token's properties.
+// Attempts to update the specified Issuing Token object to the status specified.
 func Update(id string, params *stripe.IssuingTokenParams) (*stripe.IssuingToken, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates an issuing token's properties.
+// Attempts to update the specified Issuing Token object to the status specified.
 func (c Client) Update(id string, params *stripe.IssuingTokenParams) (*stripe.IssuingToken, error) {
 	path := stripe.FormatURLPath("/v1/issuing/tokens/%s", id)
 	token := &stripe.IssuingToken{}
@@ -46,12 +46,12 @@ func (c Client) Update(id string, params *stripe.IssuingTokenParams) (*stripe.Is
 	return token, err
 }
 
-// List returns a list of issuing tokens.
+// Lists all Issuing Token objects for a given card.
 func List(params *stripe.IssuingTokenListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of issuing tokens.
+// Lists all Issuing Token objects for a given card.
 func (c Client) List(listParams *stripe.IssuingTokenListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

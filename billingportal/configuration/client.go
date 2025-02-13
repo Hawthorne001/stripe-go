@@ -10,8 +10,8 @@ package configuration
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /billing_portal/configurations APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new billing portal configuration.
+// Creates a configuration that describes the functionality and behavior of a PortalSession
 func New(params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	return getC().New(params)
 }
 
-// New creates a new billing portal configuration.
+// Creates a configuration that describes the functionality and behavior of a PortalSession
 func (c Client) New(params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	configuration := &stripe.BillingPortalConfiguration{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/billing_portal/configurations",
-		c.Key,
-		params,
-		configuration,
-	)
+		http.MethodPost, "/v1/billing_portal/configurations", c.Key, params, configuration)
 	return configuration, err
 }
 
-// Get returns the details of a billing portal configuration.
+// Retrieves a configuration that describes the functionality of the customer portal.
 func Get(id string, params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a billing portal configuration.
+// Retrieves a configuration that describes the functionality of the customer portal.
 func (c Client) Get(id string, params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	path := stripe.FormatURLPath("/v1/billing_portal/configurations/%s", id)
 	configuration := &stripe.BillingPortalConfiguration{}
@@ -51,12 +46,12 @@ func (c Client) Get(id string, params *stripe.BillingPortalConfigurationParams) 
 	return configuration, err
 }
 
-// Update updates a billing portal configuration's properties.
+// Updates a configuration that describes the functionality of the customer portal.
 func Update(id string, params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates a billing portal configuration's properties.
+// Updates a configuration that describes the functionality of the customer portal.
 func (c Client) Update(id string, params *stripe.BillingPortalConfigurationParams) (*stripe.BillingPortalConfiguration, error) {
 	path := stripe.FormatURLPath("/v1/billing_portal/configurations/%s", id)
 	configuration := &stripe.BillingPortalConfiguration{}
@@ -64,12 +59,12 @@ func (c Client) Update(id string, params *stripe.BillingPortalConfigurationParam
 	return configuration, err
 }
 
-// List returns a list of billing portal configurations.
+// Returns a list of configurations that describe the functionality of the customer portal.
 func List(params *stripe.BillingPortalConfigurationListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of billing portal configurations.
+// Returns a list of configurations that describe the functionality of the customer portal.
 func (c Client) List(listParams *stripe.BillingPortalConfigurationListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

@@ -8,7 +8,7 @@ package stripe
 
 import (
 	"encoding/json"
-	"github.com/stripe/stripe-go/v76/form"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Describes how to compute the price per period. Either `per_unit` or `tiered`. `per_unit` indicates that the fixed amount (specified in `unit_amount` or `unit_amount_decimal`) will be charged per unit in `quantity` (for prices with `usage_type=licensed`), or per unit of total usage (for prices with `usage_type=metered`). `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the `tiers` and `tiers_mode` attributes.
@@ -102,6 +102,8 @@ const (
 type PriceListRecurringParams struct {
 	// Filter by billing frequency. Either `day`, `week`, `month` or `year`.
 	Interval *string `form:"interval"`
+	// Filter by the price's meter.
+	Meter *string `form:"meter"`
 	// Filter by the usage type for this price. Can be either `metered` or `licensed`.
 	UsageType *string `form:"usage_type"`
 }
@@ -119,7 +121,7 @@ type PriceListParams struct {
 	Currency *string `form:"currency"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
-	// Only return the price with these lookup_keys, if any exist.
+	// Only return the price with these lookup_keys, if any exist. You can specify up to 10 lookup_keys.
 	LookupKeys []*string `form:"lookup_keys"`
 	// Only return prices for the given product.
 	Product *string `form:"product"`
@@ -231,6 +233,8 @@ type PriceRecurringParams struct {
 	Interval *string `form:"interval"`
 	// The number of intervals between subscription billings. For example, `interval=month` and `interval_count=3` bills every 3 months. Maximum of three years interval allowed (3 years, 36 months, or 156 weeks).
 	IntervalCount *int64 `form:"interval_count"`
+	// The meter tracking the usage of a metered price
+	Meter *string `form:"meter"`
 	// Default number of trial days when subscribing a customer to this price using [`trial_from_plan=true`](https://stripe.com/docs/api#create_subscription-trial_from_plan).
 	TrialPeriodDays *int64 `form:"trial_period_days"`
 	// Configures how the quantity per period should be determined. Can be either `metered` or `licensed`. `licensed` automatically bills the `quantity` set when adding it to a subscription. `metered` aggregates the total usage based on usage records. Defaults to `licensed`.
@@ -304,7 +308,7 @@ type PriceParams struct {
 	TransferLookupKey *bool `form:"transfer_lookup_key"`
 	// Apply a transformation to the reported usage or set quantity before computing the billed price. Cannot be combined with `tiers`.
 	TransformQuantity *PriceTransformQuantityParams `form:"transform_quantity"`
-	// A positive integer in cents (or local equivalent) (or 0 for a free price) representing how much to charge. One of `unit_amount` or `custom_unit_amount` is required, unless `billing_scheme=tiered`.
+	// A positive integer in cents (or local equivalent) (or 0 for a free price) representing how much to charge. One of `unit_amount`, `unit_amount_decimal`, or `custom_unit_amount` is required, unless `billing_scheme=tiered`.
 	UnitAmount *int64 `form:"unit_amount"`
 	// Same as `unit_amount`, but accepts a decimal value in cents (or local equivalent) with at most 12 decimal places. Only one of `unit_amount` and `unit_amount_decimal` can be set.
 	UnitAmountDecimal *float64 `form:"unit_amount_decimal,high_precision"`
@@ -397,6 +401,8 @@ type PriceRecurring struct {
 	Interval PriceRecurringInterval `json:"interval"`
 	// The number of intervals (specified in the `interval` attribute) between subscription billings. For example, `interval=month` and `interval_count=3` bills every 3 months.
 	IntervalCount int64 `json:"interval_count"`
+	// The meter tracking the usage of a metered price
+	Meter string `json:"meter"`
 	// Default number of trial days when subscribing a customer to this price using [`trial_from_plan=true`](https://stripe.com/docs/api#create_subscription-trial_from_plan).
 	TrialPeriodDays int64 `json:"trial_period_days"`
 	// Configures how the quantity per period should be determined. Can be either `metered` or `licensed`. `licensed` automatically bills the `quantity` set when adding it to a subscription. `metered` aggregates the total usage based on usage records. Defaults to `licensed`.

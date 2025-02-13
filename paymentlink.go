@@ -136,6 +136,7 @@ const (
 	PaymentLinkPaymentMethodTypeAffirm           PaymentLinkPaymentMethodType = "affirm"
 	PaymentLinkPaymentMethodTypeAfterpayClearpay PaymentLinkPaymentMethodType = "afterpay_clearpay"
 	PaymentLinkPaymentMethodTypeAlipay           PaymentLinkPaymentMethodType = "alipay"
+	PaymentLinkPaymentMethodTypeAlma             PaymentLinkPaymentMethodType = "alma"
 	PaymentLinkPaymentMethodTypeAUBECSDebit      PaymentLinkPaymentMethodType = "au_becs_debit"
 	PaymentLinkPaymentMethodTypeBACSDebit        PaymentLinkPaymentMethodType = "bacs_debit"
 	PaymentLinkPaymentMethodTypeBancontact       PaymentLinkPaymentMethodType = "bancontact"
@@ -151,8 +152,11 @@ const (
 	PaymentLinkPaymentMethodTypeKlarna           PaymentLinkPaymentMethodType = "klarna"
 	PaymentLinkPaymentMethodTypeKonbini          PaymentLinkPaymentMethodType = "konbini"
 	PaymentLinkPaymentMethodTypeLink             PaymentLinkPaymentMethodType = "link"
+	PaymentLinkPaymentMethodTypeMobilepay        PaymentLinkPaymentMethodType = "mobilepay"
+	PaymentLinkPaymentMethodTypeMultibanco       PaymentLinkPaymentMethodType = "multibanco"
 	PaymentLinkPaymentMethodTypeOXXO             PaymentLinkPaymentMethodType = "oxxo"
 	PaymentLinkPaymentMethodTypeP24              PaymentLinkPaymentMethodType = "p24"
+	PaymentLinkPaymentMethodTypePayByBank        PaymentLinkPaymentMethodType = "pay_by_bank"
 	PaymentLinkPaymentMethodTypePayNow           PaymentLinkPaymentMethodType = "paynow"
 	PaymentLinkPaymentMethodTypePaypal           PaymentLinkPaymentMethodType = "paypal"
 	PaymentLinkPaymentMethodTypePix              PaymentLinkPaymentMethodType = "pix"
@@ -160,8 +164,10 @@ const (
 	PaymentLinkPaymentMethodTypeSEPADebit        PaymentLinkPaymentMethodType = "sepa_debit"
 	PaymentLinkPaymentMethodTypeSofort           PaymentLinkPaymentMethodType = "sofort"
 	PaymentLinkPaymentMethodTypeSwish            PaymentLinkPaymentMethodType = "swish"
+	PaymentLinkPaymentMethodTypeTWINT            PaymentLinkPaymentMethodType = "twint"
 	PaymentLinkPaymentMethodTypeUSBankAccount    PaymentLinkPaymentMethodType = "us_bank_account"
 	PaymentLinkPaymentMethodTypeWeChatPay        PaymentLinkPaymentMethodType = "wechat_pay"
+	PaymentLinkPaymentMethodTypeZip              PaymentLinkPaymentMethodType = "zip"
 )
 
 // Indicates the type of transaction being performed which customizes relevant text on the page, such as the submit button.
@@ -169,10 +175,11 @@ type PaymentLinkSubmitType string
 
 // List of values that PaymentLinkSubmitType can take
 const (
-	PaymentLinkSubmitTypeAuto   PaymentLinkSubmitType = "auto"
-	PaymentLinkSubmitTypeBook   PaymentLinkSubmitType = "book"
-	PaymentLinkSubmitTypeDonate PaymentLinkSubmitType = "donate"
-	PaymentLinkSubmitTypePay    PaymentLinkSubmitType = "pay"
+	PaymentLinkSubmitTypeAuto      PaymentLinkSubmitType = "auto"
+	PaymentLinkSubmitTypeBook      PaymentLinkSubmitType = "book"
+	PaymentLinkSubmitTypeDonate    PaymentLinkSubmitType = "donate"
+	PaymentLinkSubmitTypePay       PaymentLinkSubmitType = "pay"
+	PaymentLinkSubmitTypeSubscribe PaymentLinkSubmitType = "subscribe"
 )
 
 // Type of the account referenced.
@@ -192,6 +199,14 @@ const (
 	PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethodCancel        PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethod = "cancel"
 	PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethodCreateInvoice PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethod = "create_invoice"
 	PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethodPause         PaymentLinkSubscriptionDataTrialSettingsEndBehaviorMissingPaymentMethod = "pause"
+)
+
+type PaymentLinkTaxIDCollectionRequired string
+
+// List of values that PaymentLinkTaxIDCollectionRequired can take
+const (
+	PaymentLinkTaxIDCollectionRequiredIfSupported PaymentLinkTaxIDCollectionRequired = "if_supported"
+	PaymentLinkTaxIDCollectionRequiredNever       PaymentLinkTaxIDCollectionRequired = "never"
 )
 
 // Returns a list of your payment links.
@@ -240,7 +255,9 @@ type PaymentLinkAutomaticTaxLiabilityParams struct {
 
 // Configuration for automatic tax collection.
 type PaymentLinkAutomaticTaxParams struct {
-	// If `true`, tax will be calculated automatically using the customer's location.
+	// Set to `true` to [calculate tax automatically](https://docs.stripe.com/tax) using the customer's location.
+	//
+	// Enabling this parameter causes the payment link to collect any billing address information necessary for tax calculation.
 	Enabled *bool `form:"enabled"`
 	// The account that's liable for tax. If set, the business address and tax registrations required to perform the tax calculation are loaded from this account. The tax transaction is returned in the report of the connected account.
 	Liability *PaymentLinkAutomaticTaxLiabilityParams `form:"liability"`
@@ -360,9 +377,9 @@ type PaymentLinkCustomTextParams struct {
 
 // Default custom fields to be displayed on invoices for this customer.
 type PaymentLinkInvoiceCreationInvoiceDataCustomFieldParams struct {
-	// The name of the custom field. This may be up to 30 characters.
+	// The name of the custom field. This may be up to 40 characters.
 	Name *string `form:"name"`
-	// The value of the custom field. This may be up to 30 characters.
+	// The value of the custom field. This may be up to 140 characters.
 	Value *string `form:"value"`
 }
 
@@ -457,9 +474,11 @@ type PaymentLinkPaymentIntentDataParams struct {
 	//
 	// When processing card payments, Checkout also uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules, such as SCA.
 	SetupFutureUsage *string `form:"setup_future_usage"`
-	// Extra information about the payment. This will appear on your customer's statement when this payment succeeds in creating a charge.
+	// Text that appears on the customer's statement as the statement descriptor for a non-card charge. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
+	//
+	// Setting this value for a card charge returns an error. For card charges, set the [statement_descriptor_suffix](https://docs.stripe.com/get-started/account/statement-descriptors#dynamic) instead.
 	StatementDescriptor *string `form:"statement_descriptor"`
-	// Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.
+	// Provides information about a card charge. Concatenated to the account's [statement descriptor prefix](https://docs.stripe.com/get-started/account/statement-descriptors#static) to form the complete statement descriptor that appears on the customer's statement.
 	StatementDescriptorSuffix *string `form:"statement_descriptor_suffix"`
 	// A string that identifies the resulting payment as part of a group. See the PaymentIntents [use case for connected accounts](https://stripe.com/docs/connect/separate-charges-and-transfers) for details.
 	TransferGroup *string `form:"transfer_group"`
@@ -497,7 +516,7 @@ type PaymentLinkRestrictionsParams struct {
 // Configuration for collecting the customer's shipping address.
 type PaymentLinkShippingAddressCollectionParams struct {
 	// An array of two-letter ISO country codes representing which countries Checkout should provide as options for
-	// shipping locations. Unsupported country codes: `AS, CX, CC, CU, HM, IR, KP, MH, FM, NF, MP, PW, SD, SY, UM, VI`.
+	// shipping locations.
 	AllowedCountries []*string `form:"allowed_countries"`
 }
 
@@ -558,8 +577,10 @@ func (p *PaymentLinkSubscriptionDataParams) AddMetadata(key string, value string
 
 // Controls tax ID collection during checkout.
 type PaymentLinkTaxIDCollectionParams struct {
-	// Set to `true` to enable tax ID collection.
+	// Enable tax ID collection during checkout. Defaults to `false`.
 	Enabled *bool `form:"enabled"`
+	// Describes whether a tax ID is required during checkout. Defaults to `never`.
+	Required *string `form:"required"`
 }
 
 // The account (if any) the payments will be attributed to for tax reporting, and where funds from each payment will be transferred to.
@@ -852,9 +873,9 @@ type PaymentLinkPaymentIntentData struct {
 	Metadata map[string]string `json:"metadata"`
 	// Indicates that you intend to make future payments with the payment method collected during checkout.
 	SetupFutureUsage PaymentLinkPaymentIntentDataSetupFutureUsage `json:"setup_future_usage"`
-	// Extra information about the payment. This will appear on your customer's statement when this payment succeeds in creating a charge.
+	// For a non-card payment, information about the charge that appears on the customer's statement when this payment succeeds in creating a charge.
 	StatementDescriptor string `json:"statement_descriptor"`
-	// Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.
+	// For a card payment, information about the charge that appears on the customer's statement when this payment succeeds in creating a charge. Concatenated with the account's statement descriptor prefix to form the complete statement descriptor.
 	StatementDescriptorSuffix string `json:"statement_descriptor_suffix"`
 	// A string that identifies the resulting payment as part of a group. See the PaymentIntents [use case for connected accounts](https://stripe.com/docs/connect/separate-charges-and-transfers) for details.
 	TransferGroup string `json:"transfer_group"`
@@ -924,7 +945,8 @@ type PaymentLinkSubscriptionData struct {
 }
 type PaymentLinkTaxIDCollection struct {
 	// Indicates whether tax ID collection is enabled for the session.
-	Enabled bool `json:"enabled"`
+	Enabled  bool                               `json:"enabled"`
+	Required PaymentLinkTaxIDCollectionRequired `json:"required"`
 }
 
 // The account (if any) the payments will be attributed to for tax reporting, and where funds from each payment will be transferred to.

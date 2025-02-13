@@ -13,8 +13,14 @@ type TerminalConfigurationParams struct {
 	BBPOSWisePOSE *TerminalConfigurationBBPOSWisePOSEParams `form:"bbpos_wisepos_e"`
 	// Specifies which fields in the response should be expanded.
 	Expand []*string `form:"expand"`
+	// Name of the configuration
+	Name *string `form:"name"`
 	// Configurations for collecting transactions offline.
 	Offline *TerminalConfigurationOfflineParams `form:"offline"`
+	// Reboot time settings for readers that support customized reboot time configuration.
+	RebootWindow *TerminalConfigurationRebootWindowParams `form:"reboot_window"`
+	// An object containing device type specific settings for Stripe S700 readers
+	StripeS700 *TerminalConfigurationStripeS700Params `form:"stripe_s700"`
 	// Tipping configurations for readers supporting on-reader tips
 	Tipping *TerminalConfigurationTippingParams `form:"tipping"`
 	// An object containing device type specific settings for Verifone P400 readers
@@ -36,6 +42,20 @@ type TerminalConfigurationBBPOSWisePOSEParams struct {
 type TerminalConfigurationOfflineParams struct {
 	// Determines whether to allow transactions to be collected while reader is offline. Defaults to false.
 	Enabled *bool `form:"enabled"`
+}
+
+// Reboot time settings for readers that support customized reboot time configuration.
+type TerminalConfigurationRebootWindowParams struct {
+	// Integer between 0 to 23 that represents the end hour of the reboot time window. The value must be different than the start_hour.
+	EndHour *int64 `form:"end_hour"`
+	// Integer between 0 to 23 that represents the start hour of the reboot time window.
+	StartHour *int64 `form:"start_hour"`
+}
+
+// An object containing device type specific settings for Stripe S700 readers
+type TerminalConfigurationStripeS700Params struct {
+	// A File ID representing an image you would like displayed on the reader.
+	Splashscreen *string `form:"splashscreen"`
 }
 
 // Tipping configuration for AUD
@@ -118,6 +138,16 @@ type TerminalConfigurationTippingHKDParams struct {
 	SmartTipThreshold *int64 `form:"smart_tip_threshold"`
 }
 
+// Tipping configuration for JPY
+type TerminalConfigurationTippingJPYParams struct {
+	// Fixed amounts displayed when collecting a tip
+	FixedAmounts []*int64 `form:"fixed_amounts"`
+	// Percentages displayed when collecting a tip
+	Percentages []*int64 `form:"percentages"`
+	// Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+	SmartTipThreshold *int64 `form:"smart_tip_threshold"`
+}
+
 // Tipping configuration for MYR
 type TerminalConfigurationTippingMYRParams struct {
 	// Fixed amounts displayed when collecting a tip
@@ -140,6 +170,16 @@ type TerminalConfigurationTippingNOKParams struct {
 
 // Tipping configuration for NZD
 type TerminalConfigurationTippingNZDParams struct {
+	// Fixed amounts displayed when collecting a tip
+	FixedAmounts []*int64 `form:"fixed_amounts"`
+	// Percentages displayed when collecting a tip
+	Percentages []*int64 `form:"percentages"`
+	// Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+	SmartTipThreshold *int64 `form:"smart_tip_threshold"`
+}
+
+// Tipping configuration for PLN
+type TerminalConfigurationTippingPlnParams struct {
 	// Fixed amounts displayed when collecting a tip
 	FixedAmounts []*int64 `form:"fixed_amounts"`
 	// Percentages displayed when collecting a tip
@@ -196,12 +236,16 @@ type TerminalConfigurationTippingParams struct {
 	GBP *TerminalConfigurationTippingGBPParams `form:"gbp"`
 	// Tipping configuration for HKD
 	HKD *TerminalConfigurationTippingHKDParams `form:"hkd"`
+	// Tipping configuration for JPY
+	JPY *TerminalConfigurationTippingJPYParams `form:"jpy"`
 	// Tipping configuration for MYR
 	MYR *TerminalConfigurationTippingMYRParams `form:"myr"`
 	// Tipping configuration for NOK
 	NOK *TerminalConfigurationTippingNOKParams `form:"nok"`
 	// Tipping configuration for NZD
 	NZD *TerminalConfigurationTippingNZDParams `form:"nzd"`
+	// Tipping configuration for PLN
+	Pln *TerminalConfigurationTippingPlnParams `form:"pln"`
 	// Tipping configuration for SEK
 	SEK *TerminalConfigurationTippingSEKParams `form:"sek"`
 	// Tipping configuration for SGD
@@ -237,6 +281,16 @@ type TerminalConfigurationBBPOSWisePOSE struct {
 type TerminalConfigurationOffline struct {
 	// Determines whether to allow transactions to be collected while reader is offline. Defaults to false.
 	Enabled bool `json:"enabled"`
+}
+type TerminalConfigurationRebootWindow struct {
+	// Integer between 0 to 23 that represents the end hour of the reboot time window. The value must be different than the start_hour.
+	EndHour int64 `json:"end_hour"`
+	// Integer between 0 to 23 that represents the start hour of the reboot time window.
+	StartHour int64 `json:"start_hour"`
+}
+type TerminalConfigurationStripeS700 struct {
+	// A File ID representing an image you would like displayed on the reader.
+	Splashscreen *File `json:"splashscreen"`
 }
 type TerminalConfigurationTippingAUD struct {
 	// Fixed amounts displayed when collecting a tip
@@ -302,6 +356,14 @@ type TerminalConfigurationTippingHKD struct {
 	// Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
 	SmartTipThreshold int64 `json:"smart_tip_threshold"`
 }
+type TerminalConfigurationTippingJPY struct {
+	// Fixed amounts displayed when collecting a tip
+	FixedAmounts []int64 `json:"fixed_amounts"`
+	// Percentages displayed when collecting a tip
+	Percentages []int64 `json:"percentages"`
+	// Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+	SmartTipThreshold int64 `json:"smart_tip_threshold"`
+}
 type TerminalConfigurationTippingMYR struct {
 	// Fixed amounts displayed when collecting a tip
 	FixedAmounts []int64 `json:"fixed_amounts"`
@@ -319,6 +381,14 @@ type TerminalConfigurationTippingNOK struct {
 	SmartTipThreshold int64 `json:"smart_tip_threshold"`
 }
 type TerminalConfigurationTippingNZD struct {
+	// Fixed amounts displayed when collecting a tip
+	FixedAmounts []int64 `json:"fixed_amounts"`
+	// Percentages displayed when collecting a tip
+	Percentages []int64 `json:"percentages"`
+	// Below this amount, fixed amounts will be displayed; above it, percentages will be displayed
+	SmartTipThreshold int64 `json:"smart_tip_threshold"`
+}
+type TerminalConfigurationTippingPln struct {
 	// Fixed amounts displayed when collecting a tip
 	FixedAmounts []int64 `json:"fixed_amounts"`
 	// Percentages displayed when collecting a tip
@@ -359,9 +429,11 @@ type TerminalConfigurationTipping struct {
 	EUR *TerminalConfigurationTippingEUR `json:"eur"`
 	GBP *TerminalConfigurationTippingGBP `json:"gbp"`
 	HKD *TerminalConfigurationTippingHKD `json:"hkd"`
+	JPY *TerminalConfigurationTippingJPY `json:"jpy"`
 	MYR *TerminalConfigurationTippingMYR `json:"myr"`
 	NOK *TerminalConfigurationTippingNOK `json:"nok"`
 	NZD *TerminalConfigurationTippingNZD `json:"nzd"`
+	Pln *TerminalConfigurationTippingPln `json:"pln"`
 	SEK *TerminalConfigurationTippingSEK `json:"sek"`
 	SGD *TerminalConfigurationTippingSGD `json:"sgd"`
 	USD *TerminalConfigurationTippingUSD `json:"usd"`
@@ -382,9 +454,13 @@ type TerminalConfiguration struct {
 	IsAccountDefault bool `json:"is_account_default"`
 	// Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
 	Livemode bool `json:"livemode"`
+	// String indicating the name of the Configuration object, set by the user
+	Name string `json:"name"`
 	// String representing the object's type. Objects of the same type share the same value.
 	Object       string                             `json:"object"`
 	Offline      *TerminalConfigurationOffline      `json:"offline"`
+	RebootWindow *TerminalConfigurationRebootWindow `json:"reboot_window"`
+	StripeS700   *TerminalConfigurationStripeS700   `json:"stripe_s700"`
 	Tipping      *TerminalConfigurationTipping      `json:"tipping"`
 	VerifoneP400 *TerminalConfigurationVerifoneP400 `json:"verifone_p400"`
 }

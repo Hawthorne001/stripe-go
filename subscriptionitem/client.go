@@ -10,8 +10,8 @@ package subscriptionitem
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /subscription_items APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new subscription item.
+// Adds a new item to an existing subscription. No existing items will be changed or replaced.
 func New(params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	return getC().New(params)
 }
 
-// New creates a new subscription item.
+// Adds a new item to an existing subscription. No existing items will be changed or replaced.
 func (c Client) New(params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	subscriptionitem := &stripe.SubscriptionItem{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/subscription_items",
-		c.Key,
-		params,
-		subscriptionitem,
-	)
+		http.MethodPost, "/v1/subscription_items", c.Key, params, subscriptionitem)
 	return subscriptionitem, err
 }
 
-// Get returns the details of a subscription item.
+// Retrieves the subscription item with the given ID.
 func Get(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a subscription item.
+// Retrieves the subscription item with the given ID.
 func (c Client) Get(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	path := stripe.FormatURLPath("/v1/subscription_items/%s", id)
 	subscriptionitem := &stripe.SubscriptionItem{}
@@ -51,12 +46,12 @@ func (c Client) Get(id string, params *stripe.SubscriptionItemParams) (*stripe.S
 	return subscriptionitem, err
 }
 
-// Update updates a subscription item's properties.
+// Updates the plan or quantity of an item on a current subscription.
 func Update(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates a subscription item's properties.
+// Updates the plan or quantity of an item on a current subscription.
 func (c Client) Update(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	path := stripe.FormatURLPath("/v1/subscription_items/%s", id)
 	subscriptionitem := &stripe.SubscriptionItem{}
@@ -64,12 +59,12 @@ func (c Client) Update(id string, params *stripe.SubscriptionItemParams) (*strip
 	return subscriptionitem, err
 }
 
-// Del removes a subscription item.
+// Deletes an item from the subscription. Removing a subscription item from a subscription will not cancel the subscription.
 func Del(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	return getC().Del(id, params)
 }
 
-// Del removes a subscription item.
+// Deletes an item from the subscription. Removing a subscription item from a subscription will not cancel the subscription.
 func (c Client) Del(id string, params *stripe.SubscriptionItemParams) (*stripe.SubscriptionItem, error) {
 	path := stripe.FormatURLPath("/v1/subscription_items/%s", id)
 	subscriptionitem := &stripe.SubscriptionItem{}
@@ -77,12 +72,12 @@ func (c Client) Del(id string, params *stripe.SubscriptionItemParams) (*stripe.S
 	return subscriptionitem, err
 }
 
-// List returns a list of subscription items.
+// Returns a list of your subscription items for a given subscription.
 func List(params *stripe.SubscriptionItemListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of subscription items.
+// Returns a list of your subscription items for a given subscription.
 func (c Client) List(listParams *stripe.SubscriptionItemListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
@@ -116,17 +111,20 @@ func (i *Iter) SubscriptionItemList() *stripe.SubscriptionItemList {
 	return i.List().(*stripe.SubscriptionItemList)
 }
 
-// UsageRecordSummaries is the method for the `GET /v1/subscription_items/{subscription_item}/usage_record_summaries` API.
+// For the specified subscription item, returns a list of summary objects. Each object in the list provides usage information that's been summarized from multiple usage records and over a subscription billing period (e.g., 15 usage records in the month of September).
+//
+// The list is sorted in reverse-chronological order (newest first). The first list item represents the most current usage period that hasn't ended yet. Since new usage records can still be added, the returned summary information for the subscription item's ID should be seen as unstable until the subscription billing period ends.
 func UsageRecordSummaries(params *stripe.SubscriptionItemUsageRecordSummariesParams) *UsageRecordSummaryIter {
 	return getC().UsageRecordSummaries(params)
 }
 
-// UsageRecordSummaries is the method for the `GET /v1/subscription_items/{subscription_item}/usage_record_summaries` API.
+// For the specified subscription item, returns a list of summary objects. Each object in the list provides usage information that's been summarized from multiple usage records and over a subscription billing period (e.g., 15 usage records in the month of September).
+//
+// The list is sorted in reverse-chronological order (newest first). The first list item represents the most current usage period that hasn't ended yet. Since new usage records can still be added, the returned summary information for the subscription item's ID should be seen as unstable until the subscription billing period ends.
 func (c Client) UsageRecordSummaries(listParams *stripe.SubscriptionItemUsageRecordSummariesParams) *UsageRecordSummaryIter {
 	path := stripe.FormatURLPath(
-		"/v1/subscription_items/%s/usage_record_summaries",
-		stripe.StringValue(listParams.SubscriptionItem),
-	)
+		"/v1/subscription_items/%s/usage_record_summaries", stripe.StringValue(
+			listParams.SubscriptionItem))
 	return &UsageRecordSummaryIter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {
 			list := &stripe.UsageRecordSummaryList{}

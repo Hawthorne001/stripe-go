@@ -10,7 +10,7 @@ package accountlink
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /account_links APIs.
@@ -19,21 +19,16 @@ type Client struct {
 	Key string
 }
 
-// New creates a new account link.
+// Creates an AccountLink object that includes a single-use Stripe URL that the platform can redirect their user to in order to take them through the Connect Onboarding flow.
 func New(params *stripe.AccountLinkParams) (*stripe.AccountLink, error) {
 	return getC().New(params)
 }
 
-// New creates a new account link.
+// Creates an AccountLink object that includes a single-use Stripe URL that the platform can redirect their user to in order to take them through the Connect Onboarding flow.
 func (c Client) New(params *stripe.AccountLinkParams) (*stripe.AccountLink, error) {
 	accountlink := &stripe.AccountLink{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/account_links",
-		c.Key,
-		params,
-		accountlink,
-	)
+		http.MethodPost, "/v1/account_links", c.Key, params, accountlink)
 	return accountlink, err
 }
 

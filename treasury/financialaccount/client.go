@@ -10,8 +10,8 @@ package financialaccount
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /treasury/financial_accounts APIs.
@@ -20,30 +20,25 @@ type Client struct {
 	Key string
 }
 
-// New creates a new treasury financial account.
+// Creates a new FinancialAccount. For now, each connected account can only have one FinancialAccount.
 func New(params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	return getC().New(params)
 }
 
-// New creates a new treasury financial account.
+// Creates a new FinancialAccount. For now, each connected account can only have one FinancialAccount.
 func (c Client) New(params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	financialaccount := &stripe.TreasuryFinancialAccount{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/treasury/financial_accounts",
-		c.Key,
-		params,
-		financialaccount,
-	)
+		http.MethodPost, "/v1/treasury/financial_accounts", c.Key, params, financialaccount)
 	return financialaccount, err
 }
 
-// Get returns the details of a treasury financial account.
+// Retrieves the details of a FinancialAccount.
 func Get(id string, params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a treasury financial account.
+// Retrieves the details of a FinancialAccount.
 func (c Client) Get(id string, params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	path := stripe.FormatURLPath("/v1/treasury/financial_accounts/%s", id)
 	financialaccount := &stripe.TreasuryFinancialAccount{}
@@ -51,12 +46,12 @@ func (c Client) Get(id string, params *stripe.TreasuryFinancialAccountParams) (*
 	return financialaccount, err
 }
 
-// Update updates a treasury financial account's properties.
+// Updates the details of a FinancialAccount.
 func Update(id string, params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates a treasury financial account's properties.
+// Updates the details of a FinancialAccount.
 func (c Client) Update(id string, params *stripe.TreasuryFinancialAccountParams) (*stripe.TreasuryFinancialAccount, error) {
 	path := stripe.FormatURLPath("/v1/treasury/financial_accounts/%s", id)
 	financialaccount := &stripe.TreasuryFinancialAccount{}
@@ -64,50 +59,54 @@ func (c Client) Update(id string, params *stripe.TreasuryFinancialAccountParams)
 	return financialaccount, err
 }
 
-// RetrieveFeatures is the method for the `GET /v1/treasury/financial_accounts/{financial_account}/features` API.
+// Closes a FinancialAccount. A FinancialAccount can only be closed if it has a zero balance, has no pending InboundTransfers, and has canceled all attached Issuing cards.
+func Close(id string, params *stripe.TreasuryFinancialAccountCloseParams) (*stripe.TreasuryFinancialAccount, error) {
+	return getC().Close(id, params)
+}
+
+// Closes a FinancialAccount. A FinancialAccount can only be closed if it has a zero balance, has no pending InboundTransfers, and has canceled all attached Issuing cards.
+func (c Client) Close(id string, params *stripe.TreasuryFinancialAccountCloseParams) (*stripe.TreasuryFinancialAccount, error) {
+	path := stripe.FormatURLPath("/v1/treasury/financial_accounts/%s/close", id)
+	financialaccount := &stripe.TreasuryFinancialAccount{}
+	err := c.B.Call(http.MethodPost, path, c.Key, params, financialaccount)
+	return financialaccount, err
+}
+
+// Retrieves Features information associated with the FinancialAccount.
 func RetrieveFeatures(id string, params *stripe.TreasuryFinancialAccountRetrieveFeaturesParams) (*stripe.TreasuryFinancialAccountFeatures, error) {
 	return getC().RetrieveFeatures(id, params)
 }
 
-// RetrieveFeatures is the method for the `GET /v1/treasury/financial_accounts/{financial_account}/features` API.
+// Retrieves Features information associated with the FinancialAccount.
 func (c Client) RetrieveFeatures(id string, params *stripe.TreasuryFinancialAccountRetrieveFeaturesParams) (*stripe.TreasuryFinancialAccountFeatures, error) {
 	path := stripe.FormatURLPath(
-		"/v1/treasury/financial_accounts/%s/features",
-		id,
-	)
+		"/v1/treasury/financial_accounts/%s/features", id)
 	financialaccountfeatures := &stripe.TreasuryFinancialAccountFeatures{}
 	err := c.B.Call(http.MethodGet, path, c.Key, params, financialaccountfeatures)
 	return financialaccountfeatures, err
 }
 
-// UpdateFeatures is the method for the `POST /v1/treasury/financial_accounts/{financial_account}/features` API.
+// Updates the Features associated with a FinancialAccount.
 func UpdateFeatures(id string, params *stripe.TreasuryFinancialAccountUpdateFeaturesParams) (*stripe.TreasuryFinancialAccountFeatures, error) {
 	return getC().UpdateFeatures(id, params)
 }
 
-// UpdateFeatures is the method for the `POST /v1/treasury/financial_accounts/{financial_account}/features` API.
+// Updates the Features associated with a FinancialAccount.
 func (c Client) UpdateFeatures(id string, params *stripe.TreasuryFinancialAccountUpdateFeaturesParams) (*stripe.TreasuryFinancialAccountFeatures, error) {
 	path := stripe.FormatURLPath(
-		"/v1/treasury/financial_accounts/%s/features",
-		id,
-	)
+		"/v1/treasury/financial_accounts/%s/features", id)
 	financialaccountfeatures := &stripe.TreasuryFinancialAccountFeatures{}
 	err := c.B.Call(
-		http.MethodPost,
-		path,
-		c.Key,
-		params,
-		financialaccountfeatures,
-	)
+		http.MethodPost, path, c.Key, params, financialaccountfeatures)
 	return financialaccountfeatures, err
 }
 
-// List returns a list of treasury financial accounts.
+// Returns a list of FinancialAccounts.
 func List(params *stripe.TreasuryFinancialAccountListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of treasury financial accounts.
+// Returns a list of FinancialAccounts.
 func (c Client) List(listParams *stripe.TreasuryFinancialAccountListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

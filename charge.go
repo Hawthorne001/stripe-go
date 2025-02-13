@@ -25,6 +25,24 @@ const (
 	ChargeFraudUserReportSafe       ChargeFraudUserReport = "safe"
 )
 
+// An enumerated value providing a more detailed explanation on [how to proceed with an error](https://stripe.com/docs/declines#retrying-issuer-declines).
+type ChargeOutcomeAdviceCode string
+
+// List of values that ChargeOutcomeAdviceCode can take
+const (
+	ChargeOutcomeAdviceCodeConfirmCardData ChargeOutcomeAdviceCode = "confirm_card_data"
+	ChargeOutcomeAdviceCodeDoNotTryAgain   ChargeOutcomeAdviceCode = "do_not_try_again"
+	ChargeOutcomeAdviceCodeTryAgainLater   ChargeOutcomeAdviceCode = "try_again_later"
+)
+
+// funding type of the underlying payment method.
+type ChargePaymentMethodDetailsAmazonPayFundingType string
+
+// List of values that ChargePaymentMethodDetailsAmazonPayFundingType can take
+const (
+	ChargePaymentMethodDetailsAmazonPayFundingTypeCard ChargePaymentMethodDetailsAmazonPayFundingType = "card"
+)
+
 // If a address line1 was provided, results of the check, one of `pass`, `fail`, `unavailable`, or `unchecked`.
 type ChargePaymentMethodDetailsCardChecksAddressLine1Check string
 
@@ -85,7 +103,7 @@ const (
 	ChargePaymentMethodDetailsCardMulticaptureStatusUnavailable ChargePaymentMethodDetailsCardMulticaptureStatus = "unavailable"
 )
 
-// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 type ChargePaymentMethodDetailsCardNetwork string
 
 // List of values that ChargePaymentMethodDetailsCardNetwork can take
@@ -109,6 +127,15 @@ type ChargePaymentMethodDetailsCardOvercaptureStatus string
 const (
 	ChargePaymentMethodDetailsCardOvercaptureStatusAvailable   ChargePaymentMethodDetailsCardOvercaptureStatus = "available"
 	ChargePaymentMethodDetailsCardOvercaptureStatusUnavailable ChargePaymentMethodDetailsCardOvercaptureStatus = "unavailable"
+)
+
+// Status of a card based on the card issuer.
+type ChargePaymentMethodDetailsCardRegulatedStatus string
+
+// List of values that ChargePaymentMethodDetailsCardRegulatedStatus can take
+const (
+	ChargePaymentMethodDetailsCardRegulatedStatusRegulated   ChargePaymentMethodDetailsCardRegulatedStatus = "regulated"
+	ChargePaymentMethodDetailsCardRegulatedStatusUnregulated ChargePaymentMethodDetailsCardRegulatedStatus = "unregulated"
 )
 
 // For authenticated transactions: how the customer was authenticated by
@@ -171,7 +198,7 @@ const (
 	ChargePaymentMethodDetailsCardThreeDSecureResultReasonRejected            ChargePaymentMethodDetailsCardThreeDSecureResultReason = "rejected"
 )
 
-// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 type ChargePaymentMethodDetailsCardPresentNetwork string
 
 // List of values that ChargePaymentMethodDetailsCardPresentNetwork can take
@@ -188,6 +215,14 @@ const (
 	ChargePaymentMethodDetailsCardPresentNetworkUnknown         ChargePaymentMethodDetailsCardPresentNetwork = "unknown"
 )
 
+// The method used to process this payment method offline. Only deferred is allowed.
+type ChargePaymentMethodDetailsCardPresentOfflineType string
+
+// List of values that ChargePaymentMethodDetailsCardPresentOfflineType can take
+const (
+	ChargePaymentMethodDetailsCardPresentOfflineTypeDeferred ChargePaymentMethodDetailsCardPresentOfflineType = "deferred"
+)
+
 // The type of account being debited or credited
 type ChargePaymentMethodDetailsCardPresentReceiptAccountType string
 
@@ -197,6 +232,17 @@ const (
 	ChargePaymentMethodDetailsCardPresentReceiptAccountTypeCredit   ChargePaymentMethodDetailsCardPresentReceiptAccountType = "credit"
 	ChargePaymentMethodDetailsCardPresentReceiptAccountTypePrepaid  ChargePaymentMethodDetailsCardPresentReceiptAccountType = "prepaid"
 	ChargePaymentMethodDetailsCardPresentReceiptAccountTypeUnknown  ChargePaymentMethodDetailsCardPresentReceiptAccountType = "unknown"
+)
+
+// The type of mobile wallet, one of `apple_pay`, `google_pay`, `samsung_pay`, or `unknown`.
+type ChargePaymentMethodDetailsCardPresentWalletType string
+
+// List of values that ChargePaymentMethodDetailsCardPresentWalletType can take
+const (
+	ChargePaymentMethodDetailsCardPresentWalletTypeApplePay   ChargePaymentMethodDetailsCardPresentWalletType = "apple_pay"
+	ChargePaymentMethodDetailsCardPresentWalletTypeGooglePay  ChargePaymentMethodDetailsCardPresentWalletType = "google_pay"
+	ChargePaymentMethodDetailsCardPresentWalletTypeSamsungPay ChargePaymentMethodDetailsCardPresentWalletType = "samsung_pay"
+	ChargePaymentMethodDetailsCardPresentWalletTypeUnknown    ChargePaymentMethodDetailsCardPresentWalletType = "unknown"
 )
 
 // The Klarna payment method used for this transaction.
@@ -222,6 +268,35 @@ const (
 	ChargePaymentMethodDetailsKonbiniStoreChainSeicomart  ChargePaymentMethodDetailsKonbiniStoreChain = "seicomart"
 )
 
+// The local credit or debit card brand.
+type ChargePaymentMethodDetailsKrCardBrand string
+
+// List of values that ChargePaymentMethodDetailsKrCardBrand can take
+const (
+	ChargePaymentMethodDetailsKrCardBrandBc          ChargePaymentMethodDetailsKrCardBrand = "bc"
+	ChargePaymentMethodDetailsKrCardBrandCiti        ChargePaymentMethodDetailsKrCardBrand = "citi"
+	ChargePaymentMethodDetailsKrCardBrandHana        ChargePaymentMethodDetailsKrCardBrand = "hana"
+	ChargePaymentMethodDetailsKrCardBrandHyundai     ChargePaymentMethodDetailsKrCardBrand = "hyundai"
+	ChargePaymentMethodDetailsKrCardBrandJeju        ChargePaymentMethodDetailsKrCardBrand = "jeju"
+	ChargePaymentMethodDetailsKrCardBrandJeonbuk     ChargePaymentMethodDetailsKrCardBrand = "jeonbuk"
+	ChargePaymentMethodDetailsKrCardBrandKakaobank   ChargePaymentMethodDetailsKrCardBrand = "kakaobank"
+	ChargePaymentMethodDetailsKrCardBrandKbank       ChargePaymentMethodDetailsKrCardBrand = "kbank"
+	ChargePaymentMethodDetailsKrCardBrandKdbbank     ChargePaymentMethodDetailsKrCardBrand = "kdbbank"
+	ChargePaymentMethodDetailsKrCardBrandKookmin     ChargePaymentMethodDetailsKrCardBrand = "kookmin"
+	ChargePaymentMethodDetailsKrCardBrandKwangju     ChargePaymentMethodDetailsKrCardBrand = "kwangju"
+	ChargePaymentMethodDetailsKrCardBrandLotte       ChargePaymentMethodDetailsKrCardBrand = "lotte"
+	ChargePaymentMethodDetailsKrCardBrandMg          ChargePaymentMethodDetailsKrCardBrand = "mg"
+	ChargePaymentMethodDetailsKrCardBrandNh          ChargePaymentMethodDetailsKrCardBrand = "nh"
+	ChargePaymentMethodDetailsKrCardBrandPost        ChargePaymentMethodDetailsKrCardBrand = "post"
+	ChargePaymentMethodDetailsKrCardBrandSamsung     ChargePaymentMethodDetailsKrCardBrand = "samsung"
+	ChargePaymentMethodDetailsKrCardBrandSavingsbank ChargePaymentMethodDetailsKrCardBrand = "savingsbank"
+	ChargePaymentMethodDetailsKrCardBrandShinhan     ChargePaymentMethodDetailsKrCardBrand = "shinhan"
+	ChargePaymentMethodDetailsKrCardBrandShinhyup    ChargePaymentMethodDetailsKrCardBrand = "shinhyup"
+	ChargePaymentMethodDetailsKrCardBrandSuhyup      ChargePaymentMethodDetailsKrCardBrand = "suhyup"
+	ChargePaymentMethodDetailsKrCardBrandTossbank    ChargePaymentMethodDetailsKrCardBrand = "tossbank"
+	ChargePaymentMethodDetailsKrCardBrandWoori       ChargePaymentMethodDetailsKrCardBrand = "woori"
+)
+
 // An array of conditions that are covered for the transaction, if applicable.
 type ChargePaymentMethodDetailsPaypalSellerProtectionDisputeCategory string
 
@@ -239,6 +314,14 @@ const (
 	ChargePaymentMethodDetailsPaypalSellerProtectionStatusEligible          ChargePaymentMethodDetailsPaypalSellerProtectionStatus = "eligible"
 	ChargePaymentMethodDetailsPaypalSellerProtectionStatusNotEligible       ChargePaymentMethodDetailsPaypalSellerProtectionStatus = "not_eligible"
 	ChargePaymentMethodDetailsPaypalSellerProtectionStatusPartiallyEligible ChargePaymentMethodDetailsPaypalSellerProtectionStatus = "partially_eligible"
+)
+
+// funding type of the underlying payment method.
+type ChargePaymentMethodDetailsRevolutPayFundingType string
+
+// List of values that ChargePaymentMethodDetailsRevolutPayFundingType can take
+const (
+	ChargePaymentMethodDetailsRevolutPayFundingTypeCard ChargePaymentMethodDetailsRevolutPayFundingType = "card"
 )
 
 // The type of transaction-specific details of the payment method used in the payment, one of `ach_credit_transfer`, `ach_debit`, `acss_debit`, `alipay`, `au_becs_debit`, `bancontact`, `card`, `card_present`, `eps`, `giropay`, `ideal`, `klarna`, `multibanco`, `p24`, `sepa_debit`, `sofort`, `stripe_account`, or `wechat`.
@@ -314,7 +397,7 @@ type ChargeListParams struct {
 	Expand []*string `form:"expand"`
 	// Only return charges that were created by the PaymentIntent specified by this PaymentIntent ID.
 	PaymentIntent *string `form:"payment_intent"`
-	// Only return charges for this transfer group.
+	// Only return charges for this transfer group, limited to 100.
 	TransferGroup *string `form:"transfer_group"`
 }
 
@@ -369,7 +452,7 @@ type ChargeParams struct {
 	// Amount intended to be collected by this payment. A positive integer representing how much to charge in the [smallest currency unit](https://stripe.com/docs/currencies#zero-decimal) (e.g., 100 cents to charge $1.00 or 100 to charge ¥100, a zero-decimal currency). The minimum amount is $0.50 US or [equivalent in charge currency](https://stripe.com/docs/currencies#minimum-and-maximum-charge-amounts). The amount value supports up to eight digits (e.g., a value of 99999999 for a USD charge of $999,999.99).
 	Amount         *int64 `form:"amount"`
 	ApplicationFee *int64 `form:"application_fee"`
-	// A fee in cents (or local equivalent) that will be applied to the charge and transferred to the application owner's Stripe account. The request must be made with an OAuth key or the `Stripe-Account` header in order to take an application fee. For more information, see the application fees [documentation](https://stripe.com/docs/connect/direct-charges#collecting-fees).
+	// A fee in cents (or local equivalent) that will be applied to the charge and transferred to the application owner's Stripe account. The request must be made with an OAuth key or the `Stripe-Account` header in order to take an application fee. For more information, see the application fees [documentation](https://stripe.com/docs/connect/direct-charges#collect-fees).
 	ApplicationFeeAmount *int64 `form:"application_fee_amount"`
 	// Whether to immediately capture the charge. Defaults to `true`. When `false`, the charge issues an authorization (or pre-authorization), and will need to be [captured](https://stripe.com/docs/api#capture_charge) later. Uncaptured charges expire after a set number of days (7 by default). For more information, see the [authorizing charges and settling later](https://stripe.com/docs/charges/placing-a-hold) documentation.
 	Capture *bool `form:"capture"`
@@ -388,7 +471,7 @@ type ChargeParams struct {
 	Level3       *ChargeLevel3Params       `form:"level3"`
 	// Set of [key-value pairs](https://stripe.com/docs/api/metadata) that you can attach to an object. This can be useful for storing additional information about the object in a structured format. Individual keys can be unset by posting an empty value to them. All keys can be unset by posting an empty value to `metadata`.
 	Metadata map[string]string `form:"metadata"`
-	// The Stripe account ID for which these funds are intended. Automatically set if you use the `destination` parameter. For details, see [Creating Separate Charges and Transfers](https://stripe.com/docs/connect/separate-charges-and-transfers#on-behalf-of).
+	// The Stripe account ID for which these funds are intended. Automatically set if you use the `destination` parameter. For details, see [Creating Separate Charges and Transfers](https://stripe.com/docs/connect/separate-charges-and-transfers#settlement-merchant).
 	OnBehalfOf *string `form:"on_behalf_of"`
 	// Options to configure Radar. See [Radar Session](https://stripe.com/docs/radar/radar-session) for more information.
 	RadarOptions *ChargeRadarOptionsParams `form:"radar_options"`
@@ -397,9 +480,11 @@ type ChargeParams struct {
 	// Shipping information for the charge. Helps prevent fraud on charges for physical goods.
 	Shipping *ShippingDetailsParams     `form:"shipping"`
 	Source   *PaymentSourceSourceParams `form:"*"` // PaymentSourceSourceParams has custom encoding so brought to top level with "*"
-	// For card charges, use `statement_descriptor_suffix` instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.
+	// For a non-card charge, text that appears on the customer's statement as the statement descriptor. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
+	//
+	// For a card charge, this value is ignored unless you don't specify a `statement_descriptor_suffix`, in which case this value is used as the suffix.
 	StatementDescriptor *string `form:"statement_descriptor"`
-	// Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.
+	// Provides information about a card charge. Concatenated to the account's [statement descriptor prefix](https://docs.stripe.com/get-started/account/statement-descriptors#static) to form the complete statement descriptor that appears on the customer's statement. If the account has no prefix value, the suffix is concatenated to the account's statement descriptor.
 	StatementDescriptorSuffix *string `form:"statement_descriptor_suffix"`
 	// An optional dictionary including the account to automatically transfer to as part of a destination charge. [See the Connect documentation](https://stripe.com/docs/connect/destination-charges) for details.
 	TransferData *ChargeTransferDataParams `form:"transfer_data"`
@@ -476,9 +561,11 @@ type ChargeCaptureParams struct {
 	Expand []*string `form:"expand"`
 	// The email address to send this charge's receipt to. This will override the previously-specified email address for this charge, if one was set. Receipts will not be sent in test mode.
 	ReceiptEmail *string `form:"receipt_email"`
-	// For card charges, use `statement_descriptor_suffix` instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.
+	// For a non-card charge, text that appears on the customer's statement as the statement descriptor. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
+	//
+	// For a card charge, this value is ignored unless you don't specify a `statement_descriptor_suffix`, in which case this value is used as the suffix.
 	StatementDescriptor *string `form:"statement_descriptor"`
-	// Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.
+	// Provides information about a card charge. Concatenated to the account's [statement descriptor prefix](https://docs.stripe.com/get-started/account/statement-descriptors#static) to form the complete statement descriptor that appears on the customer's statement. If the account has no prefix value, the suffix is concatenated to the account's statement descriptor.
 	StatementDescriptorSuffix *string `form:"statement_descriptor_suffix"`
 	// An optional dictionary including the account to automatically transfer to as part of a destination charge. [See the Connect documentation](https://stripe.com/docs/connect/destination-charges) for details.
 	TransferData *ChargeCaptureTransferDataParams `form:"transfer_data"`
@@ -538,6 +625,12 @@ type ChargeOutcomeRule struct {
 
 // Details about whether the payment was accepted, and why. See [understanding declines](https://stripe.com/docs/declines) for details.
 type ChargeOutcome struct {
+	// An enumerated value providing a more detailed explanation on [how to proceed with an error](https://stripe.com/docs/declines#retrying-issuer-declines).
+	AdviceCode ChargeOutcomeAdviceCode `json:"advice_code"`
+	// For charges declined by the network, a 2 digit code which indicates the advice returned by the network on how to proceed with an error.
+	NetworkAdviceCode string `json:"network_advice_code"`
+	// For charges declined by the network, a brand specific 2, 3, or 4 digit code which indicates the reason the authorization failed.
+	NetworkDeclineCode string `json:"network_decline_code"`
 	// Possible values are `approved_by_network`, `declined_by_network`, `not_sent_to_network`, and `reversed_after_approval`. The value `reversed_after_approval` indicates the payment was [blocked by Stripe](https://stripe.com/docs/declines#blocked-payments) after bank authorization, and may temporarily appear as "pending" on a cardholder's statement.
 	NetworkStatus string `json:"network_status"`
 	// An enumerated value providing a more detailed explanation of the outcome's `type`. Charges blocked by Radar's default block rule have the value `highest_risk_level`. Charges placed in review by Radar's default review rule have the value `elevated_risk_level`. Charges authorized, blocked, or placed in review by custom rules have the value `rule`. See [understanding declines](https://stripe.com/docs/declines) for more details.
@@ -609,7 +702,10 @@ type ChargePaymentMethodDetailsACSSDebit struct {
 	// Transit number of the bank account.
 	TransitNumber string `json:"transit_number"`
 }
-type ChargePaymentMethodDetailsAffirm struct{}
+type ChargePaymentMethodDetailsAffirm struct {
+	// The Affirm transaction ID associated with this payment.
+	TransactionID string `json:"transaction_id"`
+}
 type ChargePaymentMethodDetailsAfterpayClearpay struct {
 	// The Afterpay order ID associated with this payment intent.
 	OrderID string `json:"order_id"`
@@ -623,6 +719,29 @@ type ChargePaymentMethodDetailsAlipay struct {
 	Fingerprint string `json:"fingerprint"`
 	// Transaction ID of this particular Alipay transaction.
 	TransactionID string `json:"transaction_id"`
+}
+type ChargePaymentMethodDetailsAlma struct{}
+type ChargePaymentMethodDetailsAmazonPayFundingCard struct {
+	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	Brand string `json:"brand"`
+	// Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you've collected.
+	Country string `json:"country"`
+	// Two-digit number representing the card's expiration month.
+	ExpMonth int64 `json:"exp_month"`
+	// Four-digit number representing the card's expiration year.
+	ExpYear int64 `json:"exp_year"`
+	// Card funding type. Can be `credit`, `debit`, `prepaid`, or `unknown`.
+	Funding string `json:"funding"`
+	// The last four digits of the card.
+	Last4 string `json:"last4"`
+}
+type ChargePaymentMethodDetailsAmazonPayFunding struct {
+	Card *ChargePaymentMethodDetailsAmazonPayFundingCard `json:"card"`
+	// funding type of the underlying payment method.
+	Type ChargePaymentMethodDetailsAmazonPayFundingType `json:"type"`
+}
+type ChargePaymentMethodDetailsAmazonPay struct {
+	Funding *ChargePaymentMethodDetailsAmazonPayFunding `json:"funding"`
 }
 type ChargePaymentMethodDetailsAUBECSDebit struct {
 	// Bank-State-Branch number of the bank account.
@@ -664,7 +783,10 @@ type ChargePaymentMethodDetailsBancontact struct {
 	// (if supported) at the time of authorization or settlement. They cannot be set or mutated.
 	VerifiedName string `json:"verified_name"`
 }
-type ChargePaymentMethodDetailsBLIK struct{}
+type ChargePaymentMethodDetailsBLIK struct {
+	// A unique and immutable identifier assigned by BLIK to every buyer.
+	BuyerID string `json:"buyer_id"`
+}
 type ChargePaymentMethodDetailsBoleto struct {
 	// The tax ID of the customer (CPF for individuals consumers or CNPJ for businesses consumers)
 	TaxID string `json:"tax_id"`
@@ -779,7 +901,9 @@ type ChargePaymentMethodDetailsCardWallet struct {
 type ChargePaymentMethodDetailsCard struct {
 	// The authorized amount.
 	AmountAuthorized int64 `json:"amount_authorized"`
-	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	// Authorization code on the charge.
+	AuthorizationCode string `json:"authorization_code"`
+	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 	Brand PaymentMethodCardBrand `json:"brand"`
 	// When using manual capture, a future timestamp at which the charge will be automatically refunded if uncaptured.
 	CaptureBefore int64 `json:"capture_before"`
@@ -810,11 +934,15 @@ type ChargePaymentMethodDetailsCard struct {
 	// True if this payment was marked as MOTO and out of scope for SCA.
 	MOTO         bool                                        `json:"moto"`
 	Multicapture *ChargePaymentMethodDetailsCardMulticapture `json:"multicapture"`
-	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 	Network ChargePaymentMethodDetailsCardNetwork `json:"network"`
 	// If this card has network token credentials, this contains the details of the network token credentials.
 	NetworkToken *ChargePaymentMethodDetailsCardNetworkToken `json:"network_token"`
-	Overcapture  *ChargePaymentMethodDetailsCardOvercapture  `json:"overcapture"`
+	// This is used by the financial networks to identify a transaction. Visa calls this the Transaction ID, Mastercard calls this the Trace ID, and American Express calls this the Acquirer Reference Data. The first three digits of the Trace ID is the Financial Network Code, the next 6 digits is the Banknet Reference Number, and the last 4 digits represent the date (MM/DD). This field will be available for successful Visa, Mastercard, or American Express transactions and always null for other card brands.
+	NetworkTransactionID string                                     `json:"network_transaction_id"`
+	Overcapture          *ChargePaymentMethodDetailsCardOvercapture `json:"overcapture"`
+	// Status of a card based on the card issuer.
+	RegulatedStatus ChargePaymentMethodDetailsCardRegulatedStatus `json:"regulated_status"`
 	// Populated if this transaction used 3D Secure authentication.
 	ThreeDSecure *ChargePaymentMethodDetailsCardThreeDSecure `json:"three_d_secure"`
 	// If this Card is part of a card wallet, this contains the details of the card wallet.
@@ -833,6 +961,8 @@ type ChargePaymentMethodDetailsCard struct {
 type ChargePaymentMethodDetailsCardPresentOffline struct {
 	// Time at which the payment was collected while offline
 	StoredAt int64 `json:"stored_at"`
+	// The method used to process this payment method offline. Only deferred is allowed.
+	Type ChargePaymentMethodDetailsCardPresentOfflineType `json:"type"`
 }
 
 // A collection of fields required to be displayed on receipts. Only required for EMV transactions.
@@ -847,7 +977,7 @@ type ChargePaymentMethodDetailsCardPresentReceipt struct {
 	AuthorizationCode string `json:"authorization_code"`
 	// EMV tag 8A. A code returned by the card issuer.
 	AuthorizationResponseCode string `json:"authorization_response_code"`
-	// How the cardholder verified ownership of the card.
+	// Describes the method used by the cardholder to verify ownership of the card. One of the following: `approval`, `failure`, `none`, `offline_pin`, `offline_pin_and_signature`, `online_pin`, or `signature`.
 	CardholderVerificationMethod string `json:"cardholder_verification_method"`
 	// EMV tag 84. Similar to the application identifier stored on the integrated circuit chip.
 	DedicatedFileName string `json:"dedicated_file_name"`
@@ -856,11 +986,17 @@ type ChargePaymentMethodDetailsCardPresentReceipt struct {
 	// An indication of various EMV functions performed during the transaction.
 	TransactionStatusInformation string `json:"transaction_status_information"`
 }
+type ChargePaymentMethodDetailsCardPresentWallet struct {
+	// The type of mobile wallet, one of `apple_pay`, `google_pay`, `samsung_pay`, or `unknown`.
+	Type ChargePaymentMethodDetailsCardPresentWalletType `json:"type"`
+}
 type ChargePaymentMethodDetailsCardPresent struct {
 	// The authorized amount
 	AmountAuthorized int64 `json:"amount_authorized"`
-	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 	Brand PaymentMethodCardBrand `json:"brand"`
+	// The [product code](https://stripe.com/docs/card-product-codes) that identifies the specific program or product associated with a card.
+	BrandProduct string `json:"brand_product"`
 	// When using manual capture, a future timestamp after which the charge will be automatically refunded if uncaptured.
 	CaptureBefore int64 `json:"capture_before"`
 	// The cardholder name as read from the card, in [ISO 7813](https://en.wikipedia.org/wiki/ISO/IEC_7813) format. May include alphanumeric characters, special characters and first/last name separator (`/`). In some cases, the cardholder name may not be available depending on how the issuer has configured the card. Cardholder name is typically not available on swipe or contactless payments, such as those made with Apple Pay and Google Pay.
@@ -885,16 +1021,21 @@ type ChargePaymentMethodDetailsCardPresent struct {
 	IncrementalAuthorizationSupported bool `json:"incremental_authorization_supported"`
 	// The last four digits of the card.
 	Last4 string `json:"last4"`
-	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 	Network ChargePaymentMethodDetailsCardPresentNetwork `json:"network"`
+	// This is used by the financial networks to identify a transaction. Visa calls this the Transaction ID, Mastercard calls this the Trace ID, and American Express calls this the Acquirer Reference Data. The first three digits of the Trace ID is the Financial Network Code, the next 6 digits is the Banknet Reference Number, and the last 4 digits represent the date (MM/DD). This field will be available for successful Visa, Mastercard, or American Express transactions and always null for other card brands.
+	NetworkTransactionID string `json:"network_transaction_id"`
 	// Details about payments collected offline.
 	Offline *ChargePaymentMethodDetailsCardPresentOffline `json:"offline"`
 	// Defines whether the authorized amount can be over-captured or not
 	OvercaptureSupported bool `json:"overcapture_supported"`
+	// EMV tag 5F2D. Preferred languages specified by the integrated circuit chip.
+	PreferredLocales []string `json:"preferred_locales"`
 	// How card details were read in this transaction.
 	ReadMethod string `json:"read_method"`
 	// A collection of fields required to be displayed on receipts. Only required for EMV transactions.
 	Receipt *ChargePaymentMethodDetailsCardPresentReceipt `json:"receipt"`
+	Wallet  *ChargePaymentMethodDetailsCardPresentWallet  `json:"wallet"`
 	// Please note that the fields below are for internal use only and are not returned
 	// as part of standard API requests.
 	// A high-level description of the type of cards issued in this range. (For internal use only and not typically available in standard API requests.)
@@ -971,7 +1112,7 @@ type ChargePaymentMethodDetailsInteracPresentReceipt struct {
 	AuthorizationCode string `json:"authorization_code"`
 	// EMV tag 8A. A code returned by the card issuer.
 	AuthorizationResponseCode string `json:"authorization_response_code"`
-	// How the cardholder verified ownership of the card.
+	// Describes the method used by the cardholder to verify ownership of the card. One of the following: `approval`, `failure`, `none`, `offline_pin`, `offline_pin_and_signature`, `online_pin`, or `signature`.
 	CardholderVerificationMethod string `json:"cardholder_verification_method"`
 	// EMV tag 84. Similar to the application identifier stored on the integrated circuit chip.
 	DedicatedFileName string `json:"dedicated_file_name"`
@@ -1003,8 +1144,10 @@ type ChargePaymentMethodDetailsInteracPresent struct {
 	GeneratedCard string `json:"generated_card"`
 	// The last four digits of the card.
 	Last4 string `json:"last4"`
-	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	// Identifies which network this charge was processed on. Can be `amex`, `cartes_bancaires`, `diners`, `discover`, `eftpos_au`, `interac`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
 	Network string `json:"network"`
+	// This is used by the financial networks to identify a transaction. Visa calls this the Transaction ID, Mastercard calls this the Trace ID, and American Express calls this the Acquirer Reference Data. The first three digits of the Trace ID is the Financial Network Code, the next 6 digits is the Banknet Reference Number, and the last 4 digits represent the date (MM/DD). This field will be available for successful Visa, Mastercard, or American Express transactions and always null for other card brands.
+	NetworkTransactionID string `json:"network_transaction_id"`
 	// EMV tag 5F2D. Preferred languages specified by the integrated circuit chip.
 	PreferredLocales []string `json:"preferred_locales"`
 	// How card details were read in this transaction.
@@ -1020,12 +1163,30 @@ type ChargePaymentMethodDetailsInteracPresent struct {
 	// The name of the card's issuing bank. (For internal use only and not typically available in standard API requests.)
 	Issuer string `json:"issuer"`
 }
+type ChargePaymentMethodDetailsKakaoPay struct {
+	// A unique identifier for the buyer as determined by the local payment processor.
+	BuyerID string `json:"buyer_id"`
+}
+
+// The payer's address
+type ChargePaymentMethodDetailsKlarnaPayerDetailsAddress struct {
+	// The payer address country
+	Country string `json:"country"`
+}
+
+// The payer details for this transaction.
+type ChargePaymentMethodDetailsKlarnaPayerDetails struct {
+	// The payer's address
+	Address *ChargePaymentMethodDetailsKlarnaPayerDetailsAddress `json:"address"`
+}
 type ChargePaymentMethodDetailsKlarna struct {
+	// The payer details for this transaction.
+	PayerDetails *ChargePaymentMethodDetailsKlarnaPayerDetails `json:"payer_details"`
 	// The Klarna payment method used for this transaction.
 	// Can be one of `pay_later`, `pay_now`, `pay_with_financing`, or `pay_in_installments`
 	PaymentMethodCategory ChargePaymentMethodDetailsKlarnaPaymentMethodCategory `json:"payment_method_category"`
 	// Preferred language of the Klarna authorization page that the customer is redirected to.
-	// Can be one of `de-AT`, `en-AT`, `nl-BE`, `fr-BE`, `en-BE`, `de-DE`, `en-DE`, `da-DK`, `en-DK`, `es-ES`, `en-ES`, `fi-FI`, `sv-FI`, `en-FI`, `en-GB`, `en-IE`, `it-IT`, `en-IT`, `nl-NL`, `en-NL`, `nb-NO`, `en-NO`, `sv-SE`, `en-SE`, `en-US`, `es-US`, `fr-FR`, `en-FR`, `cs-CZ`, `en-CZ`, `el-GR`, `en-GR`, `en-AU`, `en-NZ`, `en-CA`, `fr-CA`, `pl-PL`, `en-PL`, `pt-PT`, `en-PT`, `de-CH`, `fr-CH`, `it-CH`, or `en-CH`
+	// Can be one of `de-AT`, `en-AT`, `nl-BE`, `fr-BE`, `en-BE`, `de-DE`, `en-DE`, `da-DK`, `en-DK`, `es-ES`, `en-ES`, `fi-FI`, `sv-FI`, `en-FI`, `en-GB`, `en-IE`, `it-IT`, `en-IT`, `nl-NL`, `en-NL`, `nb-NO`, `en-NO`, `sv-SE`, `en-SE`, `en-US`, `es-US`, `fr-FR`, `en-FR`, `cs-CZ`, `en-CZ`, `ro-RO`, `en-RO`, `el-GR`, `en-GR`, `en-AU`, `en-NZ`, `en-CA`, `fr-CA`, `pl-PL`, `en-PL`, `pt-PT`, `en-PT`, `de-CH`, `fr-CH`, `it-CH`, or `en-CH`
 	PreferredLocale string `json:"preferred_locale"`
 }
 
@@ -1038,16 +1199,46 @@ type ChargePaymentMethodDetailsKonbini struct {
 	// If the payment succeeded, this contains the details of the convenience store where the payment was completed.
 	Store *ChargePaymentMethodDetailsKonbiniStore `json:"store"`
 }
+type ChargePaymentMethodDetailsKrCard struct {
+	// The local credit or debit card brand.
+	Brand ChargePaymentMethodDetailsKrCardBrand `json:"brand"`
+	// A unique identifier for the buyer as determined by the local payment processor.
+	BuyerID string `json:"buyer_id"`
+	// The last four digits of the card. This may not be present for American Express cards.
+	Last4 string `json:"last4"`
+}
 type ChargePaymentMethodDetailsLink struct {
 	// Two-letter ISO code representing the funding source country beneath the Link payment.
 	// You could use this attribute to get a sense of international fees.
 	Country string `json:"country"`
+}
+
+// Internal card details
+type ChargePaymentMethodDetailsMobilepayCard struct {
+	// Brand of the card used in the transaction
+	Brand string `json:"brand"`
+	// Two-letter ISO code representing the country of the card
+	Country string `json:"country"`
+	// Two digit number representing the card's expiration month
+	ExpMonth int64 `json:"exp_month"`
+	// Two digit number representing the card's expiration year
+	ExpYear int64 `json:"exp_year"`
+	// The last 4 digits of the card
+	Last4 string `json:"last4"`
+}
+type ChargePaymentMethodDetailsMobilepay struct {
+	// Internal card details
+	Card *ChargePaymentMethodDetailsMobilepayCard `json:"card"`
 }
 type ChargePaymentMethodDetailsMultibanco struct {
 	// Entity number associated with this Multibanco payment.
 	Entity string `json:"entity"`
 	// Reference number associated with this Multibanco payment.
 	Reference string `json:"reference"`
+}
+type ChargePaymentMethodDetailsNaverPay struct {
+	// A unique identifier for the buyer as determined by the local payment processor.
+	BuyerID string `json:"buyer_id"`
 }
 type ChargePaymentMethodDetailsOXXO struct {
 	// OXXO reference number
@@ -1063,6 +1254,11 @@ type ChargePaymentMethodDetailsP24 struct {
 	// Przelewy24 rarely provides this information so the attribute is usually empty.
 	VerifiedName string `json:"verified_name"`
 }
+type ChargePaymentMethodDetailsPayByBank struct{}
+type ChargePaymentMethodDetailsPayco struct {
+	// A unique identifier for the buyer as determined by the local payment processor.
+	BuyerID string `json:"buyer_id"`
+}
 type ChargePaymentMethodDetailsPayNow struct {
 	// Reference number associated with this PayNow payment
 	Reference string `json:"reference"`
@@ -1076,6 +1272,8 @@ type ChargePaymentMethodDetailsPaypalSellerProtection struct {
 	Status ChargePaymentMethodDetailsPaypalSellerProtectionStatus `json:"status"`
 }
 type ChargePaymentMethodDetailsPaypal struct {
+	// Two-letter ISO code representing the buyer's country. Values are provided by PayPal directly (if supported) at the time of authorization or settlement. They cannot be set or mutated.
+	Country string `json:"country"`
 	// Owner's email. Values are provided by PayPal directly
 	// (if supported) at the time of authorization or settlement. They cannot be set or mutated.
 	PayerEmail string `json:"payer_email"`
@@ -1097,7 +1295,32 @@ type ChargePaymentMethodDetailsPromptPay struct {
 	// Bill reference generated by PromptPay
 	Reference string `json:"reference"`
 }
-type ChargePaymentMethodDetailsRevolutPay struct{}
+type ChargePaymentMethodDetailsRevolutPayFundingCard struct {
+	// Card brand. Can be `amex`, `diners`, `discover`, `eftpos_au`, `jcb`, `link`, `mastercard`, `unionpay`, `visa`, or `unknown`.
+	Brand string `json:"brand"`
+	// Two-letter ISO code representing the country of the card. You could use this attribute to get a sense of the international breakdown of cards you've collected.
+	Country string `json:"country"`
+	// Two-digit number representing the card's expiration month.
+	ExpMonth int64 `json:"exp_month"`
+	// Four-digit number representing the card's expiration year.
+	ExpYear int64 `json:"exp_year"`
+	// Card funding type. Can be `credit`, `debit`, `prepaid`, or `unknown`.
+	Funding string `json:"funding"`
+	// The last four digits of the card.
+	Last4 string `json:"last4"`
+}
+type ChargePaymentMethodDetailsRevolutPayFunding struct {
+	Card *ChargePaymentMethodDetailsRevolutPayFundingCard `json:"card"`
+	// funding type of the underlying payment method.
+	Type ChargePaymentMethodDetailsRevolutPayFundingType `json:"type"`
+}
+type ChargePaymentMethodDetailsRevolutPay struct {
+	Funding *ChargePaymentMethodDetailsRevolutPayFunding `json:"funding"`
+}
+type ChargePaymentMethodDetailsSamsungPay struct {
+	// A unique identifier for the buyer as determined by the local payment processor.
+	BuyerID string `json:"buyer_id"`
+}
 type ChargePaymentMethodDetailsSEPACreditTransfer struct {
 	// Name of the bank associated with the bank account.
 	BankName string `json:"bank_name"`
@@ -1151,6 +1374,7 @@ type ChargePaymentMethodDetailsSwish struct {
 	// The last four digits of the Swish account phone number
 	VerifiedPhoneLast4 string `json:"verified_phone_last4"`
 }
+type ChargePaymentMethodDetailsTWINT struct{}
 type ChargePaymentMethodDetailsUSBankAccount struct {
 	// Account holder type: individual or company.
 	AccountHolderType ChargePaymentMethodDetailsUSBankAccountAccountHolderType `json:"account_holder_type"`
@@ -1162,6 +1386,10 @@ type ChargePaymentMethodDetailsUSBankAccount struct {
 	Fingerprint string `json:"fingerprint"`
 	// Last four digits of the bank account number.
 	Last4 string `json:"last4"`
+	// ID of the mandate used to make this payment.
+	Mandate *Mandate `json:"mandate"`
+	// Reference number to locate ACH payments with customer's bank.
+	PaymentReference string `json:"payment_reference"`
 	// Routing number of the bank account.
 	RoutingNumber string `json:"routing_number"`
 }
@@ -1182,6 +1410,8 @@ type ChargePaymentMethodDetails struct {
 	Affirm             *ChargePaymentMethodDetailsAffirm             `json:"affirm"`
 	AfterpayClearpay   *ChargePaymentMethodDetailsAfterpayClearpay   `json:"afterpay_clearpay"`
 	Alipay             *ChargePaymentMethodDetailsAlipay             `json:"alipay"`
+	Alma               *ChargePaymentMethodDetailsAlma               `json:"alma"`
+	AmazonPay          *ChargePaymentMethodDetailsAmazonPay          `json:"amazon_pay"`
 	AUBECSDebit        *ChargePaymentMethodDetailsAUBECSDebit        `json:"au_becs_debit"`
 	BACSDebit          *ChargePaymentMethodDetailsBACSDebit          `json:"bacs_debit"`
 	Bancontact         *ChargePaymentMethodDetailsBancontact         `json:"bancontact"`
@@ -1197,22 +1427,30 @@ type ChargePaymentMethodDetails struct {
 	Grabpay            *ChargePaymentMethodDetailsGrabpay            `json:"grabpay"`
 	IDEAL              *ChargePaymentMethodDetailsIDEAL              `json:"ideal"`
 	InteracPresent     *ChargePaymentMethodDetailsInteracPresent     `json:"interac_present"`
+	KakaoPay           *ChargePaymentMethodDetailsKakaoPay           `json:"kakao_pay"`
 	Klarna             *ChargePaymentMethodDetailsKlarna             `json:"klarna"`
 	Konbini            *ChargePaymentMethodDetailsKonbini            `json:"konbini"`
+	KrCard             *ChargePaymentMethodDetailsKrCard             `json:"kr_card"`
 	Link               *ChargePaymentMethodDetailsLink               `json:"link"`
+	Mobilepay          *ChargePaymentMethodDetailsMobilepay          `json:"mobilepay"`
 	Multibanco         *ChargePaymentMethodDetailsMultibanco         `json:"multibanco"`
+	NaverPay           *ChargePaymentMethodDetailsNaverPay           `json:"naver_pay"`
 	OXXO               *ChargePaymentMethodDetailsOXXO               `json:"oxxo"`
 	P24                *ChargePaymentMethodDetailsP24                `json:"p24"`
+	PayByBank          *ChargePaymentMethodDetailsPayByBank          `json:"pay_by_bank"`
+	Payco              *ChargePaymentMethodDetailsPayco              `json:"payco"`
 	PayNow             *ChargePaymentMethodDetailsPayNow             `json:"paynow"`
 	Paypal             *ChargePaymentMethodDetailsPaypal             `json:"paypal"`
 	Pix                *ChargePaymentMethodDetailsPix                `json:"pix"`
 	PromptPay          *ChargePaymentMethodDetailsPromptPay          `json:"promptpay"`
 	RevolutPay         *ChargePaymentMethodDetailsRevolutPay         `json:"revolut_pay"`
+	SamsungPay         *ChargePaymentMethodDetailsSamsungPay         `json:"samsung_pay"`
 	SEPACreditTransfer *ChargePaymentMethodDetailsSEPACreditTransfer `json:"sepa_credit_transfer"`
 	SEPADebit          *ChargePaymentMethodDetailsSEPADebit          `json:"sepa_debit"`
 	Sofort             *ChargePaymentMethodDetailsSofort             `json:"sofort"`
 	StripeAccount      *ChargePaymentMethodDetailsStripeAccount      `json:"stripe_account"`
 	Swish              *ChargePaymentMethodDetailsSwish              `json:"swish"`
+	TWINT              *ChargePaymentMethodDetailsTWINT              `json:"twint"`
 	// The type of transaction-specific details of the payment method used in the payment, one of `ach_credit_transfer`, `ach_debit`, `acss_debit`, `alipay`, `au_becs_debit`, `bancontact`, `card`, `card_present`, `eps`, `giropay`, `ideal`, `klarna`, `multibanco`, `p24`, `sepa_debit`, `sofort`, `stripe_account`, or `wechat`.
 	// An additional hash is included on `payment_method_details` with a name matching this value.
 	// It contains information specific to the payment method.
@@ -1251,16 +1489,16 @@ type Charge struct {
 	AmountRefunded int64 `json:"amount_refunded"`
 	// ID of the Connect application that created the charge.
 	Application *Application `json:"application"`
-	// The application fee (if any) for the charge. [See the Connect documentation](https://stripe.com/docs/connect/direct-charges#collecting-fees) for details.
+	// The application fee (if any) for the charge. [See the Connect documentation](https://stripe.com/docs/connect/direct-charges#collect-fees) for details.
 	ApplicationFee *ApplicationFee `json:"application_fee"`
-	// The amount of the application fee (if any) requested for the charge. [See the Connect documentation](https://stripe.com/docs/connect/direct-charges#collecting-fees) for details.
+	// The amount of the application fee (if any) requested for the charge. [See the Connect documentation](https://stripe.com/docs/connect/direct-charges#collect-fees) for details.
 	ApplicationFeeAmount int64 `json:"application_fee_amount"`
 	// Authorization code on the charge.
 	AuthorizationCode string `json:"authorization_code"`
 	// ID of the balance transaction that describes the impact of this charge on your account balance (not including refunds or disputes).
 	BalanceTransaction *BalanceTransaction   `json:"balance_transaction"`
 	BillingDetails     *ChargeBillingDetails `json:"billing_details"`
-	// The full statement descriptor that is passed to card networks, and that is displayed on your customers' credit card and bank statements. Allows you to see what the statement descriptor looks like after the static and dynamic portions are combined.
+	// The full statement descriptor that is passed to card networks, and that is displayed on your customers' credit card and bank statements. Allows you to see what the statement descriptor looks like after the static and dynamic portions are combined. This value only exists for card payments.
 	CalculatedStatementDescriptor string `json:"calculated_statement_descriptor"`
 	// If the charge was created without capturing, this Boolean represents whether it is still uncaptured or has since been captured.
 	Captured bool `json:"captured"`
@@ -1323,11 +1561,13 @@ type Charge struct {
 	Shipping *ShippingDetails `json:"shipping"`
 	// This is a legacy field that will be removed in the future. It contains the Source, Card, or BankAccount object used for the charge. For details about the payment method used for this charge, refer to `payment_method` or `payment_method_details` instead.
 	Source *PaymentSource `json:"source"`
-	// The transfer ID which created this charge. Only present if the charge came from another Stripe account. [See the Connect documentation](https://stripe.com/docs/connect/destination-charges) for details.
+	// The transfer ID which created this charge. Only present if the charge came from another Stripe account. [See the Connect documentation](https://docs.stripe.com/connect/destination-charges) for details.
 	SourceTransfer *Transfer `json:"source_transfer"`
-	// For card charges, use `statement_descriptor_suffix` instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.
+	// For a non-card charge, text that appears on the customer's statement as the statement descriptor. This value overrides the account's default statement descriptor. For information about requirements, including the 22-character limit, see [the Statement Descriptor docs](https://docs.stripe.com/get-started/account/statement-descriptors).
+	//
+	// For a card charge, this value is ignored unless you don't specify a `statement_descriptor_suffix`, in which case this value is used as the suffix.
 	StatementDescriptor string `json:"statement_descriptor"`
-	// Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.
+	// Provides information about a card charge. Concatenated to the account's [statement descriptor prefix](https://docs.stripe.com/get-started/account/statement-descriptors#static) to form the complete statement descriptor that appears on the customer's statement. If the account has no prefix value, the suffix is concatenated to the account's statement descriptor.
 	StatementDescriptorSuffix string `json:"statement_descriptor_suffix"`
 	// The status of the payment is either `succeeded`, `pending`, or `failed`.
 	Status ChargeStatus `json:"status"`

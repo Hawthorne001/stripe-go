@@ -90,8 +90,10 @@ const (
 
 // Returns a list of existing payouts sent to third-party bank accounts or payouts that Stripe sent to you. The payouts return in sorted order, with the most recently created payouts appearing first.
 type PayoutListParams struct {
-	ListParams       `form:"*"`
-	ArrivalDate      *int64            `form:"arrival_date"`
+	ListParams `form:"*"`
+	// Only return payouts that are expected to arrive during the given date interval.
+	ArrivalDate *int64 `form:"arrival_date"`
+	// Only return payouts that are expected to arrive during the given date interval.
 	ArrivalDateRange *RangeQueryParams `form:"arrival_date"`
 	// Only return payouts that were created during the given date interval.
 	Created *int64 `form:"created"`
@@ -176,6 +178,14 @@ func (p *PayoutReverseParams) AddMetadata(key string, value string) {
 	p.Metadata[key] = value
 }
 
+// A value that generates from the beneficiary's bank that allows users to track payouts with their bank. Banks might call this a "reference number" or something similar.
+type PayoutTraceID struct {
+	// Possible values are `pending`, `supported`, and `unsupported`. When `payout.status` is `pending` or `in_transit`, this will be `pending`. When the payout transitions to `paid`, `failed`, or `canceled`, this status will become `supported` or `unsupported` shortly after in most cases. In some cases, this may appear as `pending` for up to 10 days after `arrival_date` until transitioning to `supported` or `unsupported`.
+	Status string `json:"status"`
+	// The trace ID value if `trace_id.status` is `supported`, otherwise `nil`.
+	Value string `json:"value"`
+}
+
 // A `Payout` object is created when you receive funds from Stripe, or when you
 // initiate a payout to either a bank account or debit card of a [connected
 // Stripe account](https://stripe.com/docs/connect/bank-debit-card-payouts). You can retrieve individual payouts,
@@ -188,6 +198,10 @@ type Payout struct {
 	APIResource
 	// The amount (in cents (or local equivalent)) that transfers to your bank account or debit card.
 	Amount int64 `json:"amount"`
+	// The application fee (if any) for the payout. [See the Connect documentation](https://stripe.com/docs/connect/instant-payouts#monetization-and-fees) for details.
+	ApplicationFee *ApplicationFee `json:"application_fee"`
+	// The amount of the application fee (if any) requested for the payout. [See the Connect documentation](https://stripe.com/docs/connect/instant-payouts#monetization-and-fees) for details.
+	ApplicationFeeAmount int64 `json:"application_fee_amount"`
 	// Date that you can expect the payout to arrive in the bank. This factors in delays to account for weekends or bank holidays.
 	ArrivalDate int64 `json:"arrival_date"`
 	// Returns `true` if the payout is created by an [automated payout schedule](https://stripe.com/docs/payouts#payout-schedule) and `false` if it's [requested manually](https://stripe.com/docs/payouts#manual-payouts).
@@ -230,6 +244,8 @@ type Payout struct {
 	StatementDescriptor string `json:"statement_descriptor"`
 	// Current status of the payout: `paid`, `pending`, `in_transit`, `canceled` or `failed`. A payout is `pending` until it's submitted to the bank, when it becomes `in_transit`. The status changes to `paid` if the transaction succeeds, or to `failed` or `canceled` (within 5 business days). Some payouts that fail might initially show as `paid`, then change to `failed`.
 	Status PayoutStatus `json:"status"`
+	// A value that generates from the beneficiary's bank that allows users to track payouts with their bank. Banks might call this a "reference number" or something similar.
+	TraceID *PayoutTraceID `json:"trace_id"`
 	// Can be `bank_account` or `card`.
 	Type PayoutType `json:"type"`
 }

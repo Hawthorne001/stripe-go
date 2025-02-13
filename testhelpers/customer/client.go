@@ -10,7 +10,7 @@ package customer
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /customers APIs.
@@ -19,25 +19,18 @@ type Client struct {
 	Key string
 }
 
-// FundCashBalance is the method for the `POST /v1/test_helpers/customers/{customer}/fund_cash_balance` API.
+// Create an incoming testmode bank transfer
 func FundCashBalance(id string, params *stripe.TestHelpersCustomerFundCashBalanceParams) (*stripe.CustomerCashBalanceTransaction, error) {
 	return getC().FundCashBalance(id, params)
 }
 
-// FundCashBalance is the method for the `POST /v1/test_helpers/customers/{customer}/fund_cash_balance` API.
+// Create an incoming testmode bank transfer
 func (c Client) FundCashBalance(id string, params *stripe.TestHelpersCustomerFundCashBalanceParams) (*stripe.CustomerCashBalanceTransaction, error) {
 	path := stripe.FormatURLPath(
-		"/v1/test_helpers/customers/%s/fund_cash_balance",
-		id,
-	)
+		"/v1/test_helpers/customers/%s/fund_cash_balance", id)
 	customercashbalancetransaction := &stripe.CustomerCashBalanceTransaction{}
 	err := c.B.Call(
-		http.MethodPost,
-		path,
-		c.Key,
-		params,
-		customercashbalancetransaction,
-	)
+		http.MethodPost, path, c.Key, params, customercashbalancetransaction)
 	return customercashbalancetransaction, err
 }
 

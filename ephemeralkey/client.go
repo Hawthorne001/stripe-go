@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
+	stripe "github.com/stripe/stripe-go/v81"
 )
 
 // Client is used to invoke /ephemeral_keys APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// New creates a new ephemeral key.
+// Creates a short-lived API key for a given resource.
 func New(params *stripe.EphemeralKeyParams) (*stripe.EphemeralKey, error) {
 	return getC().New(params)
 }
 
-// New creates a new ephemeral key.
+// Creates a short-lived API key for a given resource.
 func (c Client) New(params *stripe.EphemeralKeyParams) (*stripe.EphemeralKey, error) {
 	if params.StripeVersion == nil || len(stripe.StringValue(params.StripeVersion)) == 0 {
 		return nil, fmt.Errorf("params.StripeVersion must be specified")
@@ -38,21 +38,16 @@ func (c Client) New(params *stripe.EphemeralKeyParams) (*stripe.EphemeralKey, er
 
 	ephemeralkey := &stripe.EphemeralKey{}
 	err := c.B.Call(
-		http.MethodPost,
-		"/v1/ephemeral_keys",
-		c.Key,
-		params,
-		ephemeralkey,
-	)
+		http.MethodPost, "/v1/ephemeral_keys", c.Key, params, ephemeralkey)
 	return ephemeralkey, err
 }
 
-// Del removes an ephemeral key.
+// Invalidates a short-lived API key for a given resource.
 func Del(id string, params *stripe.EphemeralKeyParams) (*stripe.EphemeralKey, error) {
 	return getC().Del(id, params)
 }
 
-// Del removes an ephemeral key.
+// Invalidates a short-lived API key for a given resource.
 func (c Client) Del(id string, params *stripe.EphemeralKeyParams) (*stripe.EphemeralKey, error) {
 	path := stripe.FormatURLPath("/v1/ephemeral_keys/%s", id)
 	ephemeralkey := &stripe.EphemeralKey{}

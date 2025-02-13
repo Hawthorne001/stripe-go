@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /customers/{customer}/sources APIs.
@@ -21,12 +21,20 @@ type Client struct {
 	Key string
 }
 
-// New creates a new payment source.
+// When you create a new credit card, you must specify a customer or recipient on which to create it.
+//
+// If the card's owner has no default card, then the new card will become the default.
+// However, if the owner already has a default, then it will not change.
+// To change the default, you should [update the customer](https://stripe.com/docs/api#update_customer) to have a new default_source.
 func New(params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	return getC().New(params)
 }
 
-// New creates a new payment source.
+// When you create a new credit card, you must specify a customer or recipient on which to create it.
+//
+// If the card's owner has no default card, then the new card will become the default.
+// However, if the owner already has a default, then it will not change.
+// To change the default, you should [update the customer](https://stripe.com/docs/api#update_customer) to have a new default_source.
 func (c Client) New(params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params should not be nil")
@@ -35,20 +43,18 @@ func (c Client) New(params *stripe.PaymentSourceParams) (*stripe.PaymentSource, 
 		return nil, fmt.Errorf("Invalid source params: customer needs to be set")
 	}
 	path := stripe.FormatURLPath(
-		"/v1/customers/%s/sources",
-		stripe.StringValue(params.Customer),
-	)
+		"/v1/customers/%s/sources", stripe.StringValue(params.Customer))
 	paymentsource := &stripe.PaymentSource{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, paymentsource)
 	return paymentsource, err
 }
 
-// Get returns the details of a payment source.
+// Retrieve a specified source for a given customer.
 func Get(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a payment source.
+// Retrieve a specified source for a given customer.
 func (c Client) Get(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params should not be nil")
@@ -57,21 +63,18 @@ func (c Client) Get(id string, params *stripe.PaymentSourceParams) (*stripe.Paym
 		return nil, fmt.Errorf("Invalid source params: customer needs to be set")
 	}
 	path := stripe.FormatURLPath(
-		"/v1/customers/%s/sources/%s",
-		stripe.StringValue(params.Customer),
-		id,
-	)
+		"/v1/customers/%s/sources/%s", stripe.StringValue(params.Customer), id)
 	paymentsource := &stripe.PaymentSource{}
 	err := c.B.Call(http.MethodGet, path, c.Key, params, paymentsource)
 	return paymentsource, err
 }
 
-// Update updates a payment source's properties.
+// Update a specified source for a given customer.
 func Update(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	return getC().Update(id, params)
 }
 
-// Update updates a payment source's properties.
+// Update a specified source for a given customer.
 func (c Client) Update(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params should not be nil")
@@ -80,21 +83,18 @@ func (c Client) Update(id string, params *stripe.PaymentSourceParams) (*stripe.P
 		return nil, fmt.Errorf("Invalid source params: customer needs to be set")
 	}
 	path := stripe.FormatURLPath(
-		"/v1/customers/%s/sources/%s",
-		stripe.StringValue(params.Customer),
-		id,
-	)
+		"/v1/customers/%s/sources/%s", stripe.StringValue(params.Customer), id)
 	paymentsource := &stripe.PaymentSource{}
 	err := c.B.Call(http.MethodPost, path, c.Key, params, paymentsource)
 	return paymentsource, err
 }
 
-// Del removes a payment source.
+// Delete a specified source for a given customer.
 func Del(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	return getC().Del(id, params)
 }
 
-// Del removes a payment source.
+// Delete a specified source for a given customer.
 func (c Client) Del(id string, params *stripe.PaymentSourceParams) (*stripe.PaymentSource, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params should not be nil")
@@ -103,21 +103,20 @@ func (c Client) Del(id string, params *stripe.PaymentSourceParams) (*stripe.Paym
 		return nil, fmt.Errorf("Invalid source params: customer needs to be set")
 	}
 	path := stripe.FormatURLPath(
-		"/v1/customers/%s/sources/%s",
-		stripe.StringValue(params.Customer),
-		id,
-	)
+		"/v1/customers/%s/sources/%s", stripe.StringValue(params.Customer), id)
 	paymentsource := &stripe.PaymentSource{}
 	err := c.B.Call(http.MethodDelete, path, c.Key, params, paymentsource)
 	return paymentsource, err
 }
 
 // Verify verifies a source which is used for bank accounts.
+// Verify a specified bank account for a given customer.
 func Verify(id string, params *stripe.PaymentSourceVerifyParams) (*stripe.PaymentSource, error) {
 	return getC().Verify(id, params)
 }
 
 // Verify verifies a source which is used for bank accounts.
+// Verify a specified bank account for a given customer.
 func (c Client) Verify(id string, params *stripe.PaymentSourceVerifyParams) (*stripe.PaymentSource, error) {
 	if params == nil {
 		return nil, fmt.Errorf("params should not be nil")
@@ -138,12 +137,12 @@ func (c Client) Verify(id string, params *stripe.PaymentSourceVerifyParams) (*st
 	return source, err
 }
 
-// List returns a list of payment sources.
+// List sources for a specified customer.
 func List(params *stripe.PaymentSourceListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of payment sources.
+// List sources for a specified customer.
 func (c Client) List(listParams *stripe.PaymentSourceListParams) *Iter {
 	var outerErr error
 	var path string

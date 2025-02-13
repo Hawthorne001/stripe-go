@@ -10,8 +10,8 @@ package supplier
 import (
 	"net/http"
 
-	stripe "github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/form"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/form"
 )
 
 // Client is used to invoke /climate/suppliers APIs.
@@ -20,12 +20,12 @@ type Client struct {
 	Key string
 }
 
-// Get returns the details of a climate supplier.
+// Retrieves a Climate supplier object.
 func Get(id string, params *stripe.ClimateSupplierParams) (*stripe.ClimateSupplier, error) {
 	return getC().Get(id, params)
 }
 
-// Get returns the details of a climate supplier.
+// Retrieves a Climate supplier object.
 func (c Client) Get(id string, params *stripe.ClimateSupplierParams) (*stripe.ClimateSupplier, error) {
 	path := stripe.FormatURLPath("/v1/climate/suppliers/%s", id)
 	supplier := &stripe.ClimateSupplier{}
@@ -33,12 +33,12 @@ func (c Client) Get(id string, params *stripe.ClimateSupplierParams) (*stripe.Cl
 	return supplier, err
 }
 
-// List returns a list of climate suppliers.
+// Lists all available Climate supplier objects.
 func List(params *stripe.ClimateSupplierListParams) *Iter {
 	return getC().List(params)
 }
 
-// List returns a list of climate suppliers.
+// Lists all available Climate supplier objects.
 func (c Client) List(listParams *stripe.ClimateSupplierListParams) *Iter {
 	return &Iter{
 		Iter: stripe.GetIter(listParams, func(p *stripe.Params, b *form.Values) ([]interface{}, stripe.ListContainer, error) {

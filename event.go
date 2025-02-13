@@ -27,6 +27,7 @@ const (
 	EventTypeApplicationFeeRefundUpdated                        EventType = "application_fee.refund.updated"
 	EventTypeApplicationFeeRefunded                             EventType = "application_fee.refunded"
 	EventTypeBalanceAvailable                                   EventType = "balance.available"
+	EventTypeBillingAlertTriggered                              EventType = "billing.alert.triggered"
 	EventTypeBillingPortalConfigurationCreated                  EventType = "billing_portal.configuration.created"
 	EventTypeBillingPortalConfigurationUpdated                  EventType = "billing_portal.configuration.updated"
 	EventTypeBillingPortalSessionCreated                        EventType = "billing_portal.session.created"
@@ -84,6 +85,7 @@ const (
 	EventTypeCustomerTaxIDUpdated                               EventType = "customer.tax_id.updated"
 	EventTypeCustomerUpdated                                    EventType = "customer.updated"
 	EventTypeCustomerCashBalanceTransactionCreated              EventType = "customer_cash_balance_transaction.created"
+	EventTypeEntitlementsActiveEntitlementSummaryUpdated        EventType = "entitlements.active_entitlement_summary.updated"
 	EventTypeFileCreated                                        EventType = "file.created"
 	EventTypeFinancialConnectionsAccountCreated                 EventType = "financial_connections.account.created"
 	EventTypeFinancialConnectionsAccountDeactivated             EventType = "financial_connections.account.deactivated"
@@ -103,6 +105,7 @@ const (
 	EventTypeInvoiceFinalizationFailed                          EventType = "invoice.finalization_failed"
 	EventTypeInvoiceFinalized                                   EventType = "invoice.finalized"
 	EventTypeInvoiceMarkedUncollectible                         EventType = "invoice.marked_uncollectible"
+	EventTypeInvoiceOverdue                                     EventType = "invoice.overdue"
 	EventTypeInvoicePaid                                        EventType = "invoice.paid"
 	EventTypeInvoicePaymentActionRequired                       EventType = "invoice.payment_action_required"
 	EventTypeInvoicePaymentFailed                               EventType = "invoice.payment_failed"
@@ -111,6 +114,7 @@ const (
 	EventTypeInvoiceUpcoming                                    EventType = "invoice.upcoming"
 	EventTypeInvoiceUpdated                                     EventType = "invoice.updated"
 	EventTypeInvoiceVoided                                      EventType = "invoice.voided"
+	EventTypeInvoiceWillBeDue                                   EventType = "invoice.will_be_due"
 	EventTypeInvoiceItemCreated                                 EventType = "invoiceitem.created"
 	EventTypeInvoiceItemDeleted                                 EventType = "invoiceitem.deleted"
 	EventTypeIssuingAuthorizationCreated                        EventType = "issuing_authorization.created"
@@ -123,11 +127,17 @@ const (
 	EventTypeIssuingDisputeClosed                               EventType = "issuing_dispute.closed"
 	EventTypeIssuingDisputeCreated                              EventType = "issuing_dispute.created"
 	EventTypeIssuingDisputeFundsReinstated                      EventType = "issuing_dispute.funds_reinstated"
+	EventTypeIssuingDisputeFundsRescinded                       EventType = "issuing_dispute.funds_rescinded"
 	EventTypeIssuingDisputeSubmitted                            EventType = "issuing_dispute.submitted"
 	EventTypeIssuingDisputeUpdated                              EventType = "issuing_dispute.updated"
+	EventTypeIssuingPersonalizationDesignActivated              EventType = "issuing_personalization_design.activated"
+	EventTypeIssuingPersonalizationDesignDeactivated            EventType = "issuing_personalization_design.deactivated"
+	EventTypeIssuingPersonalizationDesignRejected               EventType = "issuing_personalization_design.rejected"
+	EventTypeIssuingPersonalizationDesignUpdated                EventType = "issuing_personalization_design.updated"
 	EventTypeIssuingTokenCreated                                EventType = "issuing_token.created"
 	EventTypeIssuingTokenUpdated                                EventType = "issuing_token.updated"
 	EventTypeIssuingTransactionCreated                          EventType = "issuing_transaction.created"
+	EventTypeIssuingTransactionPurchaseDetailsReceiptUpdated    EventType = "issuing_transaction.purchase_details_receipt_updated"
 	EventTypeIssuingTransactionUpdated                          EventType = "issuing_transaction.updated"
 	EventTypeMandateUpdated                                     EventType = "mandate.updated"
 	EventTypePaymentIntentAmountCapturableUpdated               EventType = "payment_intent.amount_capturable_updated"
@@ -171,6 +181,7 @@ const (
 	EventTypeRadarEarlyFraudWarningCreated                      EventType = "radar.early_fraud_warning.created"
 	EventTypeRadarEarlyFraudWarningUpdated                      EventType = "radar.early_fraud_warning.updated"
 	EventTypeRefundCreated                                      EventType = "refund.created"
+	EventTypeRefundFailed                                       EventType = "refund.failed"
 	EventTypeRefundUpdated                                      EventType = "refund.updated"
 	EventTypeReportingReportRunFailed                           EventType = "reporting.report_run.failed"
 	EventTypeReportingReportRunSucceeded                        EventType = "reporting.report_run.succeeded"
@@ -233,27 +244,21 @@ const (
 	EventTypeTreasuryOutboundPaymentFailed                      EventType = "treasury.outbound_payment.failed"
 	EventTypeTreasuryOutboundPaymentPosted                      EventType = "treasury.outbound_payment.posted"
 	EventTypeTreasuryOutboundPaymentReturned                    EventType = "treasury.outbound_payment.returned"
+	EventTypeTreasuryOutboundPaymentTrackingDetailsUpdated      EventType = "treasury.outbound_payment.tracking_details_updated"
 	EventTypeTreasuryOutboundTransferCanceled                   EventType = "treasury.outbound_transfer.canceled"
 	EventTypeTreasuryOutboundTransferCreated                    EventType = "treasury.outbound_transfer.created"
 	EventTypeTreasuryOutboundTransferExpectedArrivalDateUpdated EventType = "treasury.outbound_transfer.expected_arrival_date_updated"
 	EventTypeTreasuryOutboundTransferFailed                     EventType = "treasury.outbound_transfer.failed"
 	EventTypeTreasuryOutboundTransferPosted                     EventType = "treasury.outbound_transfer.posted"
 	EventTypeTreasuryOutboundTransferReturned                   EventType = "treasury.outbound_transfer.returned"
+	EventTypeTreasuryOutboundTransferTrackingDetailsUpdated     EventType = "treasury.outbound_transfer.tracking_details_updated"
 	EventTypeTreasuryReceivedCreditCreated                      EventType = "treasury.received_credit.created"
 	EventTypeTreasuryReceivedCreditFailed                       EventType = "treasury.received_credit.failed"
 	EventTypeTreasuryReceivedCreditSucceeded                    EventType = "treasury.received_credit.succeeded"
 	EventTypeTreasuryReceivedDebitCreated                       EventType = "treasury.received_debit.created"
-	EventTypeInvoiceItemUpdated                                 EventType = "invoiceitem.updated"
-	EventTypeOrderCreated                                       EventType = "order.created"
-	EventTypeRecipientCreated                                   EventType = "recipient.created"
-	EventTypeRecipientDeleted                                   EventType = "recipient.deleted"
-	EventTypeRecipientUpdated                                   EventType = "recipient.updated"
-	EventTypeSKUCreated                                         EventType = "sku.created"
-	EventTypeSKUDeleted                                         EventType = "sku.deleted"
-	EventTypeSKUUpdated                                         EventType = "sku.updated"
 )
 
-// List events, going back up to 30 days. Each event data is rendered according to Stripe API version at its creation time, specified in [event object](https://stripe.com/docs/api/events/object) api_version attribute (not according to your current Stripe API version or Stripe-Version header).
+// List events, going back up to 30 days. Each event data is rendered according to Stripe API version at its creation time, specified in [event object](https://docs.stripe.com/api/events/object) api_version attribute (not according to your current Stripe API version or Stripe-Version header).
 type EventListParams struct {
 	ListParams `form:"*"`
 	// Only return events that were created during the given date interval.
@@ -275,7 +280,7 @@ func (p *EventListParams) AddExpand(f string) {
 	p.Expand = append(p.Expand, &f)
 }
 
-// Retrieves the details of an event. Supply the unique identifier of the event, which you might have received in a webhook.
+// Retrieves the details of an event if it was created in the last 30 days. Supply the unique identifier of the event, which you might have received in a webhook.
 type EventParams struct {
 	Params `form:"*"`
 	// Specifies which fields in the response should be expanded.
@@ -333,10 +338,10 @@ type EventRequest struct {
 // `Event` objects directly to an endpoint on your server. You can manage
 // webhooks in your
 // [account settings](https://dashboard.stripe.com/account/webhooks). Learn how
-// to [listen for events](https://stripe.com/docs/webhooks)
+// to [listen for events](https://docs.stripe.com/webhooks)
 // so that your integration can automatically trigger reactions.
 //
-// When using [Connect](https://stripe.com/docs/connect), you can also receive event notifications
+// When using [Connect](https://docs.stripe.com/connect), you can also receive event notifications
 // that occur in connected accounts. For these events, there's an
 // additional `account` attribute in the received `Event` object.
 //

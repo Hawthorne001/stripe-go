@@ -6,7 +6,7 @@
 
 package stripe
 
-import "github.com/stripe/stripe-go/v76/form"
+import "github.com/stripe/stripe-go/v81/form"
 
 // Possible values for the action parameter on usage record creation.
 const (
@@ -51,6 +51,8 @@ func (p *UsageRecordParams) AppendTo(body *form.Values, keyParts []string) {
 // metered billing of subscription prices.
 //
 // Related guide: [Metered billing](https://stripe.com/docs/billing/subscriptions/metered-billing)
+//
+// This is our legacy usage-based billing API. See the [updated usage-based billing docs](https://docs.stripe.com/billing/subscriptions/usage-based).
 type UsageRecord struct {
 	APIResource
 	// Unique identifier for the object.
